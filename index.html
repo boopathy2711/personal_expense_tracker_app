@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="en" data-view="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F6F8FC">
+<meta name="description" content="Clarity — personal finance tracker">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Clarity">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Clarity — Personal Finance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';document.head.appendChild(s);"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  :root{
+    --bg:#F1F4F9;
+    --surface:#FFFFFF;
+    --surface-2:#F4F6FB;
+    --surface-3:#E9EDF6;
+    --border:#E1E6F0;
+    --text:#1C2333;
+    --text-soft:#5B6478;
+    --text-faint:#94A0B8;
+    --accent:#2563EB;
+    --accent-dim:rgba(37,99,235,0.10);
+    --accent-2:#7C5CFC;
+    --on-accent:#FFFFFF;
+    --warn:#D97706;
+    --warn-dim:rgba(217,119,6,0.12);
+    --danger:#DC2626;
+    --danger-dim:rgba(220,38,38,0.10);
+    --success:#059669;
+    --success-dim:rgba(5,150,105,0.10);
+    --shadow-sm:0 1px 2px rgba(28,35,51,0.06);
+    --shadow-md:0 8px 24px rgba(28,35,51,0.08);
+    --shadow-lg:0 18px 40px rgba(28,35,51,0.14);
+    --radius:12px;
+    --radius-sm:8px;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-data:'IBM Plex Mono', monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  button, select, input, textarea{font-family:inherit;}
+  .icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;flex:none;}
+  .icon-fill{fill:currentColor;stroke:none;}
+
+  /* ===== SHELL ===== */
+  .app{display:flex;background:var(--bg);min-height:100vh;position:relative;}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+  .sidebar{
+    width:236px;background:var(--surface);border-right:1px solid var(--border);
+    display:none;flex-direction:column;padding:20px 14px;flex:none;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px;}
+  .brand-mark{width:32px;height:32px;flex:none;}
+  .brand-text .name{font-size:17px;font-weight:700;letter-spacing:0.2px;line-height:1;}
+  .brand-text .tag{font-size:10px;color:var(--text-faint);letter-spacing:.4px;margin-top:3px;}
+  .side-nav{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
+  .nav-btn{
+    display:flex;align-items:center;gap:11px;background:none;border:none;color:var(--text-soft);
+    padding:10px 12px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;cursor:pointer;
+    text-align:left;border-left:2px solid transparent;transition:background .15s,color .15s;
+  }
+  .nav-btn:hover{background:var(--surface-2);color:var(--text);}
+  .nav-btn.active{background:var(--accent-dim);color:var(--accent);border-left-color:var(--accent);}
+  .sidebar-foot{margin-top:auto;padding-top:14px;border-top:1px solid var(--border);}
+  .sidebar-foot .foot-label{font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
+  .sidebar-foot .foot-value{font-family:var(--font-data);font-size:18px;font-weight:700;color:var(--accent);}
+
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
+    background:var(--surface);border-bottom:1px solid var(--border);flex:none;
+  }
+  .topbar-left{display:flex;align-items:center;gap:10px;}
+  .topbar-left .brand-mark{width:28px;height:28px;}
+  .topbar-left .page-title{font-weight:700;font-size:16px;}
+  .topbar-left .page-sub{font-size:10.5px;color:var(--text-faint);}
+  .topbar-right{display:flex;align-items:center;gap:10px;}
+
+  .device-toggle{display:flex;background:var(--surface-2);border-radius:999px;padding:3px;gap:2px;border:1px solid var(--border);}
+  .device-toggle button{background:none;border:none;color:var(--text-faint);width:28px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s;}
+  .device-toggle button .icon{width:14px;height:14px;}
+  .device-toggle button.active{background:var(--accent);color:var(--on-accent);}
+
+  .quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:var(--bg);flex:none;}
+  .qstat{background:var(--surface);border-radius:var(--radius-sm);padding:10px 8px;border:1px solid var(--border);text-align:center;}
+  .qstat .qlabel{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-faint);font-weight:600;}
+  .qstat .qvalue{font-family:var(--font-data);font-size:14px;font-weight:700;margin-top:3px;color:var(--text);}
+  .qstat.accent .qvalue{color:var(--accent);}
+  .qstat.warn .qvalue{color:var(--warn);}
+  .qstat.danger .qvalue{color:var(--danger);}
+
+  .mobile-nav{
+    display:none;position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;
+    background:var(--surface);border-top:1px solid var(--border);padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    gap:2px;z-index:50;box-shadow:0 -6px 20px rgba(0,0,0,0.35);
+  }
+  .mobile-nav .nav-btn{flex:1;flex-direction:column;gap:3px;padding:7px 2px;border-radius:var(--radius-sm);font-size:9.5px;color:var(--text-faint);border-left:none;text-align:center;align-items:center;}
+  .mobile-nav .nav-btn.active{background:var(--accent-dim);color:var(--accent);}
+
+  .content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px;}
+  .view{display:none;animation:rise .25s ease;}
+  .view.active{display:block;}
+  @keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  .view-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+  .view-head h2{font-weight:700;font-size:18px;display:flex;align-items:center;gap:9px;}
+  .view-head h2 .icon{color:var(--accent);width:19px;height:19px;}
+  .view-caption{font-size:11px;color:var(--text-faint);margin-top:-8px;margin-bottom:14px;}
+
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+
+  .form-group{margin-bottom:12px;}
+  label{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-weight:600;color:var(--text-soft);font-size:11px;text-transform:uppercase;letter-spacing:.3px;}
+  label .icon{width:13px;height:13px;color:var(--accent);}
+  input, select, textarea{
+    width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    font-size:13.5px;color:var(--text);background:var(--surface-2);transition:border-color .15s, box-shadow .15s;
+  }
+  input::placeholder, textarea::placeholder{color:var(--text-faint);}
+  input:focus, select:focus, textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+  textarea{min-height:64px;resize:vertical;}
+  select{color-scheme:light;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .btn{
+    width:100%;padding:11px;border:none;border-radius:var(--radius-sm);cursor:pointer;
+    font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;
+    display:flex;align-items:center;justify-content:center;gap:8px;transition:filter .15s, transform .1s;
+  }
+  .btn:active:not(:disabled){transform:scale(0.98);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-primary{background:var(--accent);color:var(--on-accent);}
+  .btn-primary:hover{filter:brightness(1.08);}
+  .btn-secondary{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border);}
+  .btn-add{background:var(--accent-dim);color:var(--accent);border:1.5px dashed var(--accent);}
+  .btn-danger{background:var(--danger-dim);color:var(--danger);border:1.5px solid var(--danger);}
+  .btn-sm{width:auto;padding:7px 12px;font-size:10.5px;}
+
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
+  .badge.pending{background:var(--warn-dim);color:var(--warn);}
+  .badge.paid{background:var(--success-dim);color:var(--success);}
+  .badge.debit{background:var(--danger-dim);color:var(--danger);}
+  .badge.credit{background:var(--success-dim);color:var(--success);}
+  .badge.neutral{background:var(--surface-3);color:var(--text-soft);}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:9px;border-left:3px solid transparent;}
+  .card.pos{border-left-color:var(--success);}
+  .card.neg{border-left-color:var(--danger);}
+  .card-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+  .card-title{font-weight:700;font-size:13.5px;}
+  .card-amount{font-family:var(--font-data);font-weight:700;font-size:14px;}
+  .card-amount.pos{color:var(--success);}
+  .card-amount.neg{color:var(--danger);}
+  .card-meta{font-size:10.5px;color:var(--text-faint);display:flex;gap:9px;flex-wrap:wrap;align-items:center;}
+  .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:9px;gap:8px;flex-wrap:wrap;}
+  .card-footer .desc{font-size:11px;color:var(--text-soft);}
+
+  .category-item{display:flex;gap:8px;align-items:center;background:var(--surface-2);padding:7px;border-radius:var(--radius-sm);margin-bottom:6px;border:1px solid var(--border);}
+  .category-item input{flex:1;padding:8px 10px;}
+  .btn-remove{background:none;border:none;color:var(--danger);width:auto;padding:6px;}
+  .btn-remove .icon{width:15px;height:15px;}
+  .section-title{font-size:10.5px;font-weight:700;color:var(--text-faint);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:7px;}
+
+  .subtab-toggle{display:inline-flex;gap:2px;background:var(--surface-2);padding:4px;border-radius:999px;border:1px solid var(--border);margin-bottom:16px;}
+  .subtab-btn{background:none;border:none;padding:7px 14px;border-radius:999px;cursor:pointer;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-faint);}
+  .subtab-btn.active{background:var(--accent);color:var(--on-accent);}
+  .subtab-panel{display:none;}
+  .subtab-panel.active{display:block;}
+
+  .empty-state{text-align:center;padding:34px 20px;color:var(--text-faint);}
+  .empty-state .icon{width:36px;height:36px;margin:0 auto 10px;color:var(--text-faint);}
+  .empty-state p{font-size:12px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);
+    padding:12px 18px;border-radius:var(--radius-sm);font-size:12px;font-weight:600;max-width:90%;z-index:1000;
+    transition:transform .3s;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:8px;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  .toast.success{background:var(--surface-3);color:var(--success);border:1px solid var(--success);}
+  .toast.error{background:var(--surface-3);color:var(--danger);border:1px solid var(--danger);}
+
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .stat-card .slabel{font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:6px;}
+  .stat-card .svalue{font-family:var(--font-data);font-size:18px;font-weight:700;margin-top:5px;}
+  .stat-card.accent{border-color:var(--accent);}
+  .stat-card.accent .svalue{color:var(--accent);}
+  .stat-card.warn{border-color:var(--warn);}
+  .stat-card.warn .svalue{color:var(--warn);}
+  .stat-card.danger{border-color:var(--danger);}
+  .stat-card.danger .svalue{color:var(--danger);}
+
+  .chart-grid{display:grid;grid-template-columns:1fr;gap:14px;}
+  .panel h3{font-size:11.5px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.3px;color:var(--text-soft);}
+  .panel h3 .icon{width:14px;height:14px;color:var(--accent);}
+  .chart-wrap{position:relative;height:210px;width:100%;overflow:hidden;}
+  .chart-wrap canvas{max-width:100% !important;}
+
+  .legend-list{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .legend-row{display:flex;align-items:center;gap:9px;font-size:11px;}
+  .legend-dot{width:9px;height:9px;border-radius:3px;flex:none;}
+  .legend-name{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .legend-bar-track{flex:1;height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden;min-width:40px;}
+  .legend-bar-fill{height:100%;border-radius:4px;}
+  .legend-amt{font-family:var(--font-data);font-weight:600;white-space:nowrap;}
+
+  .list-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .list-row:last-child{border-bottom:none;}
+  .list-row .li-name{flex:1;font-size:12px;font-weight:500;}
+  .list-row .li-sub{font-size:10.5px;color:var(--text-faint);}
+  .list-row .li-amt{font-family:var(--font-data);font-weight:700;font-size:12px;}
+
+  .review-row{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px;}
+  .review-row .rr-top{display:flex;align-items:center;gap:8px;}
+  .review-row input[type="checkbox"]{width:auto;flex:none;}
+  .review-row .row{grid-template-columns:1fr 1fr;gap:7px;}
+  .review-row input, .review-row select{padding:7px 9px;font-size:12px;}
+
+  .drop-zone{
+    border:1.5px dashed var(--border);border-radius:var(--radius);padding:26px 16px;text-align:center;
+    cursor:pointer;transition:border-color .15s, background .15s;background:var(--surface-2);
+  }
+  .drop-zone:hover, .drop-zone.drag{border-color:var(--accent);background:var(--accent-dim);}
+  .drop-zone .icon{width:30px;height:30px;color:var(--accent);margin:0 auto 8px;}
+  .drop-zone .dz-title{font-size:12.5px;font-weight:600;}
+  .drop-zone .dz-sub{font-size:10.5px;color:var(--text-faint);margin-top:3px;}
+  .file-chip{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;font-size:11.5px;margin-top:10px;}
+  .file-chip .icon{color:var(--accent);}
+  .file-chip button{margin-left:auto;background:none;border:none;color:var(--text-faint);cursor:pointer;}
+
+  .progress-track{height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-top:8px;}
+  .progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .3s;}
+
+  /* ===== DEVICE MODES ===== */
+  body.mode-mobile .app{max-width:480px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,0.5);min-height:100vh;}
+  body.mode-mobile .sidebar{display:none;}
+  body.mode-mobile .mobile-nav{display:flex;}
+  body.mode-mobile .content{padding-bottom:78px;}
+  body.mode-mobile .stat-grid{grid-template-columns:repeat(2,1fr);}
+
+  body.mode-desktop{background:#E4E9F3;}
+  body.mode-desktop .app{max-width:1240px;margin:22px auto;border-radius:16px;overflow:hidden;box-shadow:var(--shadow-lg);min-height:calc(100vh - 44px);border:1px solid var(--border);}
+  body.mode-desktop .sidebar{display:flex;}
+  body.mode-desktop .mobile-nav{display:none;}
+  body.mode-desktop .quick-stats{grid-template-columns:repeat(4,1fr);padding:16px 28px;}
+  body.mode-desktop .content{padding:24px 28px 32px;max-width:960px;}
+  body.mode-desktop .topbar{padding:16px 28px;}
+  body.mode-desktop .panel{padding:20px;}
+  body.mode-desktop .chart-grid{grid-template-columns:1fr 1fr;}
+  body.mode-desktop .panel-wide{grid-column:1 / -1;}
+  body.mode-desktop .stat-grid{grid-template-columns:repeat(4,1fr);}
+  body.mode-desktop .form-wide{max-width:640px;}
+
+  /* ===== LOADING ===== */
+  .splash{
+    position:fixed;inset:0;z-index:2000;background:var(--bg);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    transition:opacity .4s ease, visibility .4s ease;
+  }
+  .splash.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+  .splash-mark{width:60px;height:60px;animation:splashPulse 1.6s ease-in-out infinite;}
+  .splash-ring{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface-2);border-top-color:var(--accent);animation:spin .8s linear infinite;}
+  .splash-text{color:var(--text-faint);font-size:11.5px;letter-spacing:.4px;font-weight:500;}
+  @keyframes splashPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .skel{position:relative;color:transparent !important;overflow:hidden;border-radius:4px;background:var(--surface-2);}
+  .skel::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg, transparent, rgba(148,163,184,0.25), transparent);animation:shimmer 1.3s infinite;}
+  @keyframes shimmer{from{transform:translateX(-100%);}to{transform:translateX(100%);}}
+
+  .section-spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:44px 20px;color:var(--text-faint);}
+  .section-spinner .ring{width:28px;height:28px;border-radius:50%;border:3px solid var(--surface-2);border-top-color:var(--accent);animation:spin .8s linear infinite;}
+  .section-spinner span{font-size:11px;font-weight:500;}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div class="splash" id="splash">
+  <svg class="splash-mark" viewBox="0 0 40 40"><rect x="2.4" y="2.4" width="35.2" height="35.2" rx="8.8" fill="#EAF0FE"/><polyline points="6,20 13,20 16,11 20,29 23,20 26,20 29,14 34,20" fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="splash-ring"></div>
+  <div class="splash-text">Loading Clarity...</div>
+</div>
+
+<!-- ICON SPRITE -->
+<svg style="display:none">
+  <symbol id="i-dashboard" viewBox="0 0 24 24"><path d="M4 21V12M11 21V6M18 21v-8"/><path d="M2 21h20"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3 10l9-6 9 6"/><path d="M4 10v9M9 10v9M15 10v9M20 10v9"/><path d="M3 21h18"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c1-3.5 3.3-5.5 6-5.5s5 2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c1.7.3 3 1.7 3.7 4"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M4 16v2a3 3 0 003 3h10a3 3 0 003-3v-2"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 13a7.6 7.6 0 000-2l1.9-1.4-1.9-3.3-2.2.9a7.7 7.7 0 00-1.7-1L15.1 3H8.9l-.4 2.2a7.7 7.7 0 00-1.7 1l-2.2-.9L2.7 8.6 4.6 10a7.6 7.6 0 000 2l-1.9 1.4 1.9 3.3 2.2-.9a7.7 7.7 0 001.7 1l.4 2.2h6.2l.4-2.2a7.7 7.7 0 001.7-1l2.2.9 1.9-3.3z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M16 13h2.2"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.3"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></symbol>
+  <symbol id="i-notes" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 12h7M9 16h5"/></symbol>
+  <symbol id="i-mobile" viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 19h2"/></symbol>
+  <symbol id="i-desktop" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.6 3H4v8.6L13.4 21l8.6-8.6z"/><circle class="icon-fill" cx="8.2" cy="7.5" r="1.1"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></symbol>
+  <symbol id="i-plus-sm" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M7 10V7a5 5 0 0110 0v3"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11A8 8 0 006 6.3L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0014 4.7l2-2.7"/><path d="M20 20v-4h-4"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle class="icon-fill" cx="4.5" cy="6" r="1"/><circle class="icon-fill" cx="4.5" cy="12" r="1"/><circle class="icon-fill" cx="4.5" cy="18" r="1"/></symbol>
+</svg>
+
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 40 40"><rect x="2.4" y="2.4" width="35.2" height="35.2" rx="8.8" fill="#EAF0FE"/><polyline points="6,20 13,20 16,11 20,29 23,20 26,20 29,14 34,20" fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="brand-text"><div class="name">Clarity</div><div class="tag">Personal Finance</div></div>
+    </div>
+    <nav class="side-nav" id="sideNav">
+      <button class="nav-btn active" data-tab="dashboard"><svg class="icon"><use href="#i-dashboard"/></svg>Dashboard</button>
+      <button class="nav-btn" data-tab="expense"><svg class="icon"><use href="#i-plus"/></svg>Add Expense</button>
+      <button class="nav-btn" data-tab="loans"><svg class="icon"><use href="#i-bank"/></svg>Loans &amp; EMI</button>
+      <button class="nav-btn" data-tab="receivables"><svg class="icon"><use href="#i-users"/></svg>Receivables</button>
+      <button class="nav-btn" data-tab="statements"><svg class="icon"><use href="#i-upload"/></svg>Statements</button>
+      <button class="nav-btn" data-tab="settings"><svg class="icon"><use href="#i-gear"/></svg>Settings</button>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="foot-label">Projected Balance</div>
+      <div class="foot-value skel" id="sideBalance">₹0000</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <svg class="brand-mark" viewBox="0 0 40 40"><rect x="2.4" y="2.4" width="35.2" height="35.2" rx="8.8" fill="#EAF0FE"/><polyline points="6,20 13,20 16,11 20,29 23,20 26,20 29,14 34,20" fill="none" stroke="#2563EB" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div><div class="page-title" id="pageTitle">Dashboard</div><div class="page-sub" id="pageSub">Clarity · Personal Finance</div></div>
+      </div>
+      <div class="topbar-right">
+        <div class="device-toggle" id="deviceToggle">
+          <button data-mode="mobile" title="Mobile view"><svg class="icon"><use href="#i-mobile"/></svg></button>
+          <button data-mode="desktop" title="Desktop view"><svg class="icon"><use href="#i-desktop"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="quick-stats">
+      <div class="qstat"><div class="qlabel">In Hand</div><div class="qvalue skel" id="qsInHand">₹0000</div></div>
+      <div class="qstat danger"><div class="qlabel">This Month Out</div><div class="qvalue skel" id="qsOutgoing">₹0000</div></div>
+      <div class="qstat accent"><div class="qlabel">Projected</div><div class="qvalue skel" id="qsProjected">₹0000</div></div>
+      <div class="qstat warn"><div class="qlabel">Receivables</div><div class="qvalue skel" id="qsReceivables">₹0000</div></div>
+    </div>
+
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <section id="dashboard" class="view active">
+        <div class="view-head"><h2><svg class="icon"><use href="#i-dashboard"/></svg>Dashboard</h2></div>
+
+        <div class="stat-grid" id="dashSummary"></div>
+
+        <div class="chart-grid">
+          <div class="panel">
+            <h3><svg class="icon"><use href="#i-down"/></svg>Expense by Category (This Month)</h3>
+            <div class="chart-wrap"><canvas id="chartExpenseCat"></canvas></div>
+            <div class="legend-list" id="expenseCatLegend"></div>
+          </div>
+          <div class="panel panel-wide">
+            <h3><svg class="icon"><use href="#i-dashboard"/></svg>6-Month Spend Trend (Expenses + EMI)</h3>
+            <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
+          </div>
+          <div class="panel">
+            <h3><svg class="icon"><use href="#i-bank"/></svg>Due This Month</h3>
+            <div class="list-row"><span class="li-name">EMI Pending</span><span class="li-amt" id="dashEmiPending" style="color:var(--warn);">₹0</span></div>
+            <div class="list-row"><span class="li-name">EMI Paid</span><span class="li-amt" id="dashEmiPaid" style="color:var(--success);">₹0</span></div>
+          </div>
+          <div class="panel">
+            <h3><svg class="icon"><use href="#i-users"/></svg>Receivables Snapshot</h3>
+            <div class="list-row"><span class="li-name">Counted toward balance</span><span class="li-amt" id="dashRecvCounted" style="color:var(--success);">₹0</span></div>
+            <div class="list-row"><span class="li-name">Not counted (later)</span><span class="li-amt" id="dashRecvExcluded" style="color:var(--text-faint);">₹0</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ADD EXPENSE -->
+      <section id="expense" class="view">
+        <div class="view-head form-wide"><h2><svg class="icon"><use href="#i-plus"/></svg>Add Expense</h2></div>
+        <div class="panel form-wide">
+          <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Date</label><input type="date" id="expDate" required></div>
+          <div class="row">
+            <div class="form-group"><label><svg class="icon"><use href="#i-tag"/></svg>Category</label><select id="expCategory" required><option value="">-- Select --</option></select></div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-card"/></svg>Payment Method</label><select id="expPaymentMethod"><option value="">-- Select --</option></select></div>
+          </div>
+          <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Description</label><input type="text" id="expDescription" placeholder="e.g., Groceries, Netflix" required></div>
+          <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Amount (₹)</label><input type="number" id="expAmount" placeholder="0.00" step="0.01" required></div>
+          <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><textarea id="expNotes" placeholder="Optional notes..."></textarea></div>
+          <button class="btn btn-primary" onclick="addExpense()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Submit</button>
+        </div>
+
+        <div class="section-title form-wide"><svg class="icon" style="width:12px;height:12px;"><use href="#i-list"/></svg>Recently Added</div>
+        <div id="recentExpenseList" class="form-wide"></div>
+      </section>
+
+      <!-- LOANS & EMI -->
+      <section id="loans" class="view">
+        <div class="view-head"><h2><svg class="icon"><use href="#i-bank"/></svg>Loans &amp; EMI</h2></div>
+
+        <div class="subtab-toggle" id="loanSubTabs">
+          <button class="subtab-btn active" data-loantab="list">My Loans</button>
+          <button class="subtab-btn" data-loantab="schedule">Full Schedule</button>
+        </div>
+
+        <div id="loanListPanel" class="subtab-panel active">
+          <div class="panel form-wide">
+            <div class="section-title" style="margin-top:0;"><svg class="icon" style="width:12px;height:12px;"><use href="#i-plus-sm"/></svg>Add New Loan</div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-bank"/></svg>Loan Name</label><input type="text" id="loanName" placeholder="e.g., Car Loan, Gold Loan" required></div>
+            <div class="row">
+              <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Total Amount (₹)</label><input type="number" id="loanTotal" step="0.01" placeholder="0.00"></div>
+              <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>EMI Amount (₹)</label><input type="number" id="loanEmi" step="0.01" required placeholder="0.00"></div>
+            </div>
+            <div class="row">
+              <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Start Month</label><input type="date" id="loanStart" required></div>
+              <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Tenure (Months)</label><input type="number" id="loanTenure" required placeholder="e.g., 24"></div>
+            </div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><input type="text" id="loanNotes" placeholder="Optional"></div>
+            <button class="btn btn-primary" onclick="addLoan()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Create Loan &amp; Schedule</button>
+          </div>
+
+          <div id="loanCardsList"></div>
+        </div>
+
+        <div id="loanSchedulePanel" class="subtab-panel">
+          <div class="panel" style="margin-bottom:14px;">
+            <div class="row">
+              <div class="form-group"><label><svg class="icon"><use href="#i-bank"/></svg>Loan</label><select id="schedFilterLoan" onchange="renderLoanSchedule()"><option value="all">All Loans</option></select></div>
+              <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Year</label><select id="schedFilterYear" onchange="renderLoanSchedule()"><option value="all">All Years</option></select></div>
+            </div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-tag"/></svg>Status</label>
+              <select id="schedFilterStatus" onchange="renderLoanSchedule()">
+                <option value="all">All</option><option value="Pending">Pending</option><option value="Paid">Paid</option>
+              </select>
+            </div>
+          </div>
+          <div class="view-caption" id="schedLoadedInfo" style="margin-bottom:10px;"></div>
+          <div id="loanScheduleList"></div>
+        </div>
+      </section>
+
+      <!-- RECEIVABLES -->
+      <section id="receivables" class="view">
+        <div class="view-head"><h2><svg class="icon"><use href="#i-users"/></svg>Receivables</h2></div>
+
+        <div class="panel form-wide">
+          <div class="section-title" style="margin-top:0;"><svg class="icon" style="width:12px;height:12px;"><use href="#i-plus-sm"/></svg>Add Receivable</div>
+          <div class="row">
+            <div class="form-group"><label><svg class="icon"><use href="#i-user"/></svg>Name</label><input type="text" id="recvName" required></div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Amount (₹)</label><input type="number" id="recvAmount" step="0.01" required></div>
+          </div>
+          <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Reason</label><input type="text" id="recvReason" placeholder="e.g., House buy, Emergency"></div>
+          <div class="row">
+            <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Date Given</label><input type="date" id="recvDate" required></div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-check"/></svg>Counts Toward Next Month?</label>
+              <select id="recvCounts"><option value="No">No — may take a while</option><option value="Yes">Yes — expected soon</option></select>
+            </div>
+          </div>
+          <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><input type="text" id="recvNotes" placeholder="Optional"></div>
+          <button class="btn btn-primary" onclick="addReceivable()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add Receivable</button>
+        </div>
+
+        <div class="panel" style="margin-bottom:14px;">
+          <div class="row">
+            <div class="form-group"><label><svg class="icon"><use href="#i-tag"/></svg>Status</label>
+              <select id="recvFilterStatus" onchange="renderReceivables()"><option value="Pending">Pending</option><option value="all">All</option><option value="Received">Received</option></select>
+            </div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-check"/></svg>Counts Toward Balance</label>
+              <select id="recvFilterCounts" onchange="renderReceivables()"><option value="all">All</option><option value="Yes">Yes</option><option value="No">No</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-grid" id="recvSummary"></div>
+        <div id="receivablesList"></div>
+      </section>
+
+      <!-- STATEMENTS -->
+      <section id="statements" class="view">
+        <div class="view-head"><h2><svg class="icon"><use href="#i-upload"/></svg>Statements</h2></div>
+
+        <div class="subtab-toggle" id="stmtSubTabs">
+          <button class="subtab-btn active" data-stmttab="upload">Upload</button>
+          <button class="subtab-btn" data-stmttab="history">History</button>
+        </div>
+
+        <div id="stmtUploadPanel" class="subtab-panel active">
+          <div class="panel form-wide">
+            <div class="form-group">
+              <label><svg class="icon"><use href="#i-tag"/></svg>Statement Source</label>
+              <select id="stmtSource"><option value="Credit Card">Credit Card</option><option value="Bank Account">Bank Account</option></select>
+            </div>
+
+            <div class="drop-zone" id="dropZone" onclick="document.getElementById('stmtFile').click()">
+              <svg class="icon"><use href="#i-upload"/></svg>
+              <div class="dz-title">Tap to choose a PDF statement</div>
+              <div class="dz-sub">Password-protected PDFs are supported</div>
+            </div>
+            <input type="file" id="stmtFile" accept="application/pdf" style="display:none;" onchange="onStatementFileChosen(event)">
+            <div id="fileChipWrap"></div>
+
+            <div class="form-group" style="margin-top:14px;">
+              <label><svg class="icon"><use href="#i-lock"/></svg>PDF Password (if any)</label>
+              <input type="password" id="stmtPassword" placeholder="Leave blank if not password-protected">
+            </div>
+            <div class="view-caption" style="margin:0 0 12px;">Your password is used only in this browser to open the PDF — it is never sent anywhere.</div>
+
+            <button class="btn btn-primary" id="stmtExtractBtn" onclick="extractStatement()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-upload"/></svg>Extract Transactions</button>
+          </div>
+
+          <div id="stmtProgress"></div>
+          <div id="stmtReview"></div>
+        </div>
+
+        <div id="stmtHistoryPanel" class="subtab-panel">
+          <div class="panel" style="margin-bottom:14px;">
+            <div class="row">
+              <div class="form-group"><label><svg class="icon"><use href="#i-tag"/></svg>Source</label>
+                <select id="stmtFilterSource" onchange="renderStatementHistory()"><option value="all">All Sources</option><option value="Credit Card">Credit Card</option><option value="Bank Account">Bank Account</option></select>
+              </div>
+              <div class="form-group"><label><svg class="icon"><use href="#i-tag"/></svg>Type</label>
+                <select id="stmtFilterType" onchange="renderStatementHistory()"><option value="all">Debit &amp; Credit</option><option value="Debit">Debit</option><option value="Credit">Credit</option></select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Year</label><select id="stmtFilterYear" onchange="renderStatementHistory()"><option value="all">All Years</option></select></div>
+              <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Search</label><input type="text" id="stmtFilterSearch" placeholder="Description..." oninput="renderStatementHistory()"></div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="refreshStatementHistory()"><svg class="icon" style="width:13px;height:13px;"><use href="#i-refresh"/></svg>Refresh</button>
+          </div>
+          <div class="stat-grid" id="stmtHistorySummary"></div>
+          <div class="view-caption" id="stmtLoadedInfo" style="margin-bottom:10px;"></div>
+          <div id="stmtHistoryList"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section id="settings" class="view">
+        <div class="view-head"><h2><svg class="icon"><use href="#i-gear"/></svg>Settings</h2></div>
+
+        <div class="panel form-wide">
+          <div class="section-title" style="margin-top:0;">Monthly Basics</div>
+          <div class="row">
+            <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Salary (₹)</label><input type="number" id="setSalary" step="0.01"></div>
+            <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Opening Balance (₹)</label><input type="number" id="setOpeningBalance" step="0.01"></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveConfig()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save</button>
+        </div>
+
+        <div class="panel form-wide">
+          <div class="section-title" style="margin-top:0;">Expense Categories</div>
+          <div id="expCategoryList"></div>
+          <button class="btn btn-add" onclick="addExpenseCategory()"><svg class="icon" style="width:13px;height:13px;"><use href="#i-plus-sm"/></svg>Add</button>
+
+          <div class="section-title">Payment Methods</div>
+          <div id="paymentMethodList"></div>
+          <button class="btn btn-add" onclick="addPaymentMethod()"><svg class="icon" style="width:13px;height:13px;"><use href="#i-plus-sm"/></svg>Add</button>
+
+          <button class="btn btn-primary" onclick="saveCategories()" style="margin-top:18px;"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save Categories</button>
+        </div>
+      </section>
+
+    </main>
+
+    <nav class="mobile-nav" id="mobileNav">
+      <button class="nav-btn active" data-tab="dashboard"><svg class="icon"><use href="#i-dashboard"/></svg>Home</button>
+      <button class="nav-btn" data-tab="expense"><svg class="icon"><use href="#i-plus"/></svg>Add</button>
+      <button class="nav-btn" data-tab="loans"><svg class="icon"><use href="#i-bank"/></svg>Loans</button>
+      <button class="nav-btn" data-tab="receivables"><svg class="icon"><use href="#i-users"/></svg>Owed</button>
+      <button class="nav-btn" data-tab="statements"><svg class="icon"><use href="#i-upload"/></svg>Import</button>
+    </nav>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// =========================================================
+// CONFIG — paste your Apps Script Web App URL below
+// =========================================================
+const DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbyKfd1EvB4yCan2Bodf2-DvDq8m6USDr9hbfQTJ7Inns56OY2XBSAa4iyqcRrLxXb90/exec';
+const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1eee4qGkRIjgJGUSWgZQFazKLXyINNNJWwBRjqa99jr8/edit?usp=drivesdk';
+
+let categories = { expenseCategories: [], paymentMethods: [] };
+let dashboardData = null;
+let recentExpenses = [];
+let loans = [];
+let loanSchedule = null;
+let receivables = null;
+let statementTransactions = null;
+let stmtError = null;
+let schedError = null;
+let recvError = null;
+let charts = {};
+let pendingExtractedText = null;
+
+const CATEGORY_PALETTE = ['#2563EB','#7C5CFC','#D97706','#DC2626','#059669','#DB2777','#0891B2','#EA580C','#4F46E5','#65A30D'];
+
+const PAGE_TITLES = {
+  dashboard: ['Dashboard', 'Clarity · Personal Finance'],
+  expense: ['Add Expense', 'Log a new spend'],
+  loans: ['Loans & EMI', 'Track what you owe'],
+  receivables: ['Receivables', 'Who owes you'],
+  statements: ['Statements', 'Import from PDF'],
+  settings: ['Settings', 'Salary, categories & more']
+};
+
+document.getElementById('expDate').valueAsDate = new Date();
+document.getElementById('recvDate').valueAsDate = new Date();
+
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+function formatINR(num){
+  const n = Number(num) || 0;
+  return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  const iconId = type === 'success' ? 'i-check' : 'i-alert';
+  toast.innerHTML = `<svg class="icon"><use href="#${iconId}"/></svg><span>${message}</span>`;
+  toast.className = 'toast ' + type + ' show';
+  setTimeout(() => toast.classList.remove('show'), 3200);
+}
+
+// =========================================================
+// NAV
+// =========================================================
+document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+});
+
+function switchTab(tabName){
+  document.querySelectorAll('.view').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-btn[data-tab]').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  document.querySelectorAll(`.nav-btn[data-tab="${tabName}"]`).forEach(b => b.classList.add('active'));
+
+  const titles = PAGE_TITLES[tabName];
+  if (titles){
+    document.getElementById('pageTitle').textContent = titles[0];
+    document.getElementById('pageSub').textContent = titles[1];
+  }
+
+  if (tabName === 'dashboard') loadDashboard();
+  else if (tabName === 'loans') { loadLoans(); }
+  else if (tabName === 'receivables') { loadReceivables(); }
+  else if (tabName === 'settings') { loadSettingsForm(); }
+}
+
+document.querySelectorAll('#loanSubTabs .subtab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchLoanSubTab(btn.getAttribute('data-loantab')));
+});
+function switchLoanSubTab(tab){
+  document.querySelectorAll('#loanSubTabs .subtab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-loantab') === tab));
+  document.getElementById('loanListPanel').classList.toggle('active', tab === 'list');
+  document.getElementById('loanSchedulePanel').classList.toggle('active', tab === 'schedule');
+  if (tab === 'schedule') loadLoanSchedule();
+}
+
+document.querySelectorAll('#stmtSubTabs .subtab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchStmtSubTab(btn.getAttribute('data-stmttab')));
+});
+function switchStmtSubTab(tab){
+  document.querySelectorAll('#stmtSubTabs .subtab-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-stmttab') === tab));
+  document.getElementById('stmtUploadPanel').classList.toggle('active', tab === 'upload');
+  document.getElementById('stmtHistoryPanel').classList.toggle('active', tab === 'history');
+  if (tab === 'history') loadStatementHistory();
+}
+
+// =========================================================
+// DEVICE VIEW TOGGLE
+// =========================================================
+let deviceOverride = localStorage.getItem('clarity_device_view');
+
+function applyDeviceMode(){
+  const mode = deviceOverride || (window.innerWidth >= 900 ? 'desktop' : 'mobile');
+  document.body.classList.toggle('mode-mobile', mode === 'mobile');
+  document.body.classList.toggle('mode-desktop', mode === 'desktop');
+  document.querySelectorAll('#deviceToggle button').forEach(b => b.classList.toggle('active', b.getAttribute('data-mode') === mode));
+  requestAnimationFrame(() => requestAnimationFrame(resizeAllCharts));
+}
+function resizeAllCharts(){
+  if (typeof Chart === 'undefined') return;
+  document.querySelectorAll('.chart-wrap canvas').forEach(canvas => {
+    const chart = Chart.getChart(canvas);
+    if (chart) chart.resize();
+  });
+}
+if (typeof ResizeObserver !== 'undefined'){
+  const ro = new ResizeObserver(() => resizeAllCharts());
+  window.addEventListener('load', () => document.querySelectorAll('.chart-wrap').forEach(w => ro.observe(w)));
+}
+document.querySelectorAll('#deviceToggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    deviceOverride = btn.getAttribute('data-mode');
+    localStorage.setItem('clarity_device_view', deviceOverride);
+    applyDeviceMode();
+  });
+});
+window.addEventListener('resize', () => { if (!deviceOverride) applyDeviceMode(); });
+applyDeviceMode();
+
+// =========================================================
+// INITIAL LOAD
+// =========================================================
+window.addEventListener('load', () => {
+  if (DEPLOYMENT_URL.indexOf('PASTE_YOUR') === 0){
+    hideSplash();
+    showToast('Set DEPLOYMENT_URL in the script before using Clarity', 'error');
+    return;
+  }
+  const catP = loadCategories();
+  const dashP = loadDashboard();
+  Promise.allSettled([catP, dashP]).then(hideSplash);
+  setTimeout(hideSplash, 8000);
+});
+
+function hideSplash(){
+  const el = document.getElementById('splash');
+  if (el) el.classList.add('hidden');
+}
+
+// =========================================================
+// CATEGORIES
+// =========================================================
+function loadCategories(){
+  const params = new URLSearchParams({ action: 'getCategories' });
+  return fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success){
+        categories = data;
+        populateDropdowns();
+        renderCategoryLists();
+      }
+    })
+    .catch(e => showToast('Connection error', 'error'));
+}
+
+function populateDropdowns(){
+  document.getElementById('expCategory').innerHTML = '<option value="">-- Select --</option>' +
+    categories.expenseCategories.map(c => `<option value="${c}">${c}</option>`).join('');
+  document.getElementById('expPaymentMethod').innerHTML = '<option value="">-- Select --</option>' +
+    categories.paymentMethods.map(p => `<option value="${p}">${p}</option>`).join('');
+}
+
+function renderCategoryLists(){
+  document.getElementById('expCategoryList').innerHTML = categories.expenseCategories.map((c, idx) => `
+    <div class="category-item">
+      <input type="text" value="${c}" data-idx="${idx}">
+      <button class="btn-remove" onclick="removeExpenseCategory(${idx})"><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>`).join('');
+  document.getElementById('paymentMethodList').innerHTML = categories.paymentMethods.map((p, idx) => `
+    <div class="category-item">
+      <input type="text" value="${p}" data-idx="${idx}">
+      <button class="btn-remove" onclick="removePaymentMethod(${idx})"><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>`).join('');
+}
+function addExpenseCategory(){ categories.expenseCategories.push('New'); renderCategoryLists(); }
+function addPaymentMethod(){ categories.paymentMethods.push('New'); renderCategoryLists(); }
+function removeExpenseCategory(idx){ categories.expenseCategories.splice(idx,1); renderCategoryLists(); }
+function removePaymentMethod(idx){ categories.paymentMethods.splice(idx,1); renderCategoryLists(); }
+
+function saveCategories(){
+  const data = {
+    action: 'updateCategories',
+    expenseCategories: Array.from(document.querySelectorAll('#expCategoryList input')).map(el => el.value),
+    paymentMethods: Array.from(document.querySelectorAll('#paymentMethodList input')).map(el => el.value)
+  };
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){ showToast('Categories saved', 'success'); loadCategories(); }
+      else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+// =========================================================
+// SETTINGS (Config)
+// =========================================================
+function loadSettingsForm(){
+  if (dashboardData){
+    document.getElementById('setSalary').value = dashboardData.salary || 0;
+    document.getElementById('setOpeningBalance').value = dashboardData.openingBalance || 0;
+  }
+}
+function saveConfig(){
+  const data = {
+    action: 'updateConfig',
+    salary: document.getElementById('setSalary').value,
+    openingBalance: document.getElementById('setOpeningBalance').value
+  };
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){ showToast('Settings saved', 'success'); loadDashboard(); }
+      else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+// =========================================================
+// EXPENSES
+// =========================================================
+function addExpense(){
+  const data = {
+    action: 'addExpense',
+    date: document.getElementById('expDate').value,
+    category: document.getElementById('expCategory').value,
+    description: document.getElementById('expDescription').value,
+    amount: document.getElementById('expAmount').value,
+    paymentMethod: document.getElementById('expPaymentMethod').value,
+    notes: document.getElementById('expNotes').value
+  };
+  if (!data.date || !data.category || !data.description || !data.amount){
+    showToast('Please fill all required fields', 'error');
+    return;
+  }
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        showToast('Expense added', 'success');
+        document.getElementById('expDate').valueAsDate = new Date();
+        document.getElementById('expCategory').value = '';
+        document.getElementById('expDescription').value = '';
+        document.getElementById('expAmount').value = '';
+        document.getElementById('expPaymentMethod').value = '';
+        document.getElementById('expNotes').value = '';
+        dashboardData = null;
+        loadRecentExpenses();
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+function loadRecentExpenses(){
+  const params = new URLSearchParams({ action: 'getExpenses' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && data.expenses.length > 0){
+        recentExpenses = data.expenses;
+        const html = data.expenses.slice(-6).reverse().map(ex => `
+          <div class="card neg">
+            <div class="card-header"><div class="card-title">${ex.category}</div><div class="card-amount neg">-₹${formatINR(ex.amount)}</div></div>
+            <div class="card-meta"><span>${ex.date}</span>${ex.paymentMethod ? `<span class="badge neutral">${ex.paymentMethod}</span>` : ''}</div>
+            <div class="card-footer"><span class="desc">${ex.description || ''}</span></div>
+          </div>`).join('');
+        document.getElementById('recentExpenseList').innerHTML = html;
+      } else {
+        document.getElementById('recentExpenseList').innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-notes"/></svg><p>No expenses logged yet</p></div>`;
+      }
+    })
+    .catch(e => {});
+}
+
+// =========================================================
+// DASHBOARD
+// =========================================================
+function loadDashboard(){
+  const params = new URLSearchParams({ action: 'getDashboard' });
+  return fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success){
+        dashboardData = data;
+        renderQuickStats(data);
+        renderDashboard(data);
+        loadRecentExpenses();
+      }
+    })
+    .catch(e => console.error(e));
+}
+
+function renderQuickStats(d){
+  document.getElementById('qsInHand').textContent = '₹' + formatINR(d.totalInHand);
+  document.getElementById('qsOutgoing').textContent = '₹' + formatINR(d.totalOutgoing);
+  document.getElementById('qsProjected').textContent = '₹' + formatINR(d.projectedBalance);
+  document.getElementById('qsReceivables').textContent = '₹' + formatINR(d.receivablesCounted + d.receivablesExcluded);
+  document.getElementById('sideBalance').textContent = '₹' + formatINR(d.projectedBalance);
+  document.querySelectorAll('.qvalue, #sideBalance').forEach(el => el.classList.remove('skel'));
+}
+
+function renderDashboard(d){
+  document.getElementById('dashSummary').innerHTML = `
+    <div class="stat-card"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-wallet"/></svg>Salary</div><div class="svalue">₹${formatINR(d.salary)}</div></div>
+    <div class="stat-card danger"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-down"/></svg>Expenses</div><div class="svalue">₹${formatINR(d.thisMonthExpenses)}</div></div>
+    <div class="stat-card warn"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-bank"/></svg>EMI Due</div><div class="svalue">₹${formatINR(d.thisMonthEMI)}</div></div>
+    <div class="stat-card accent"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-up"/></svg>Incl. Receivables</div><div class="svalue">₹${formatINR(d.projectedBalanceWithReceivables)}</div></div>
+  `;
+  document.getElementById('dashEmiPending').textContent = '₹' + formatINR(d.thisMonthEMIPending);
+  document.getElementById('dashEmiPaid').textContent = '₹' + formatINR(d.thisMonthEMIPaid);
+  document.getElementById('dashRecvCounted').textContent = '₹' + formatINR(d.receivablesCounted);
+  document.getElementById('dashRecvExcluded').textContent = '₹' + formatINR(d.receivablesExcluded);
+
+  loadExpenseCategoryChart();
+  loadTrendChart();
+}
+
+function colorForIndex(i){ return CATEGORY_PALETTE[i % CATEGORY_PALETTE.length]; }
+
+function loadExpenseCategoryChart(){
+  const params = new URLSearchParams({ action: 'getExpenses' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      const now = new Date();
+      const byCat = {};
+      let total = 0;
+      (data.expenses || []).forEach(ex => {
+        const d = new Date(ex.rawDate || ex.date);
+        if (isNaN(d.getTime())) return;
+        if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()){
+          const amt = parseFloat(ex.amount) || 0;
+          byCat[ex.category] = (byCat[ex.category] || 0) + amt;
+          total += amt;
+        }
+      });
+      renderDonut('chartExpenseCat', 'expenseCatLegend', byCat, total);
+    })
+    .catch(e => {});
+}
+
+function renderDonut(canvasId, legendId, dataObj, total){
+  const entries = Object.entries(dataObj).sort((a,b) => b[1]-a[1]);
+  const canvasEl = document.getElementById(canvasId);
+  const legendEl = document.getElementById(legendId);
+
+  if (entries.length === 0){
+    canvasEl.parentElement.querySelector('canvas') && (canvasEl.style.display = 'none');
+    legendEl.innerHTML = '<div style="font-size:11px;color:var(--text-faint);">No expenses logged this month yet.</div>';
+    if (charts[canvasId]){ charts[canvasId].destroy(); charts[canvasId] = null; }
+    return;
+  }
+  canvasEl.style.display = 'block';
+
+  const labels = entries.map(e => e[0]);
+  const values = entries.map(e => e[1]);
+  const colors = labels.map((_, i) => colorForIndex(i));
+
+  if (typeof Chart === 'undefined'){
+    canvasEl.parentElement.innerHTML = '<div style="font-size:11px;color:var(--text-faint);padding:18px 0;text-align:center;">Chart library unavailable — totals below.</div>';
+  } else {
+    if (charts[canvasId]) charts[canvasId].destroy();
+    charts[canvasId] = new Chart(canvasEl.getContext('2d'), {
+      type: 'doughnut',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#FFFFFF' }] },
+      options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ₹' + formatINR(c.parsed) } } } }
+    });
+  }
+
+  legendEl.innerHTML = entries.map(([name, val], i) => {
+    const pct = total > 0 ? Math.round((val/total)*100) : 0;
+    return `<div class="legend-row"><span class="legend-dot" style="background:${colorForIndex(i)}"></span><span class="legend-name">${name}</span><span class="legend-bar-track"><span class="legend-bar-fill" style="width:${pct}%;background:${colorForIndex(i)}"></span></span><span class="legend-amt">₹${formatINR(val)}</span></div>`;
+  }).join('');
+}
+
+function loadTrendChart(){
+  Promise.all([
+    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getExpenses' })).then(r => r.json()),
+    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getLoanSchedule' })).then(r => r.json())
+  ]).then(([expData, schedData]) => {
+    const months = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--){
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      months.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleString('en-US', { month: 'short' }), expense: 0, emi: 0 });
+    }
+    const byKey = {};
+    months.forEach(m => byKey[m.key] = m);
+
+    (expData.expenses || []).forEach(ex => {
+      const d = new Date(ex.rawDate || ex.date);
+      if (isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if (byKey[key]) byKey[key].expense += parseFloat(ex.amount) || 0;
+    });
+    (schedData.schedule || []).forEach(s => {
+      const d = new Date(s.monthDate);
+      if (isNaN(d.getTime())) return;
+      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      if (byKey[key]) byKey[key].emi += parseFloat(s.amount) || 0;
+    });
+
+    const canvasEl = document.getElementById('chartTrend');
+    if (typeof Chart === 'undefined'){
+      canvasEl.parentElement.innerHTML = '<div style="font-size:11px;color:var(--text-faint);padding:18px 0;text-align:center;">Chart library unavailable.</div>';
+      return;
+    }
+    if (charts['chartTrend']) charts['chartTrend'].destroy();
+    charts['chartTrend'] = new Chart(canvasEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: months.map(m => m.label),
+        datasets: [
+          { label: 'Expenses', data: months.map(m => m.expense), backgroundColor: '#DC2626', borderRadius: 5 },
+          { label: 'EMI', data: months.map(m => m.emi), backgroundColor: '#D97706', borderRadius: 5 }
+        ]
+      },
+      options: {
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true, ticks: { color: '#5B6478', callback: v => '₹' + formatINR(v) }, grid: { color: '#E1E6F0' } }, x: { ticks: { color: '#5B6478' }, grid: { display: false } } },
+        plugins: { legend: { position: 'bottom', labels: { color: '#5B6478', boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ₹${formatINR(c.parsed.y)}` } } }
+      }
+    });
+  }).catch(e => {});
+}
+
+// =========================================================
+// LOANS & EMI
+// =========================================================
+function addLoan(){
+  const data = {
+    action: 'addLoan',
+    loanName: document.getElementById('loanName').value,
+    totalAmount: document.getElementById('loanTotal').value,
+    emiAmount: document.getElementById('loanEmi').value,
+    startMonth: document.getElementById('loanStart').value,
+    tenureMonths: document.getElementById('loanTenure').value,
+    notes: document.getElementById('loanNotes').value
+  };
+  if (!data.loanName || !data.emiAmount || !data.startMonth || !data.tenureMonths){
+    showToast('Please fill Loan Name, EMI, Start Month and Tenure', 'error');
+    return;
+  }
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        showToast('Loan created', 'success');
+        document.getElementById('loanName').value = '';
+        document.getElementById('loanTotal').value = '';
+        document.getElementById('loanEmi').value = '';
+        document.getElementById('loanStart').value = '';
+        document.getElementById('loanTenure').value = '';
+        document.getElementById('loanNotes').value = '';
+        loanSchedule = null;
+        loadLoans();
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+function loadLoans(){
+  const params = new URLSearchParams({ action: 'getLoans' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      loans = (data.success && data.loans) ? data.loans : [];
+      renderLoanCards();
+      populateLoanFilterOptions();
+    })
+    .catch(e => {});
+}
+
+function renderLoanCards(){
+  const el = document.getElementById('loanCardsList');
+  if (loans.length === 0){
+    el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-bank"/></svg><p>No loans added yet</p></div>`;
+    return;
+  }
+  el.innerHTML = loans.map(l => `
+    <div class="card">
+      <div class="card-header"><div class="card-title">${l.loanName}</div><div class="card-amount">₹${formatINR(l.emiAmount)}/mo</div></div>
+      <div class="card-meta"><span>Starts ${l.startMonth}</span><span>${l.tenureMonths} months</span><span class="badge ${l.status === 'Active' ? 'pending' : 'neutral'}">${l.status}</span></div>
+      ${l.notes ? `<div class="card-footer"><span class="desc">${l.notes}</span></div>` : ''}
+    </div>`).join('');
+}
+
+function populateLoanFilterOptions(){
+  const sel = document.getElementById('schedFilterLoan');
+  const current = sel.value;
+  const names = Array.from(new Set(loans.map(l => l.loanName)));
+  sel.innerHTML = '<option value="all">All Loans</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+  if (names.includes(current)) sel.value = current;
+}
+
+function loadLoanSchedule(){
+  if (loanSchedule !== null){ renderLoanSchedule(); return; }
+  document.getElementById('loanScheduleList').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Loading schedule…</span></div>`;
+  schedError = null;
+  const params = new URLSearchParams({ action: 'getLoanSchedule' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && Array.isArray(data.schedule)){
+        loanSchedule = data.schedule;
+        populateScheduleYearFilter();
+      } else {
+        loanSchedule = [];
+        schedError = data.error || 'Could not load schedule.';
+      }
+    })
+    .catch(e => { loanSchedule = null; schedError = e.message; })
+    .finally(() => { try { renderLoanSchedule(); } catch(err){ console.error(err); } });
+}
+
+function populateScheduleYearFilter(){
+  const sel = document.getElementById('schedFilterYear');
+  const current = sel.value;
+  const years = new Set();
+  (loanSchedule || []).forEach(s => { const d = new Date(s.monthDate); if (!isNaN(d.getTime())) years.add(d.getFullYear()); });
+  const sorted = Array.from(years).sort((a,b) => a - b);
+  sel.innerHTML = '<option value="all">All Years</option>' + sorted.map(y => `<option value="${y}">${y}</option>`).join('');
+  if (sorted.includes(parseInt(current,10))) sel.value = current;
+}
+
+function renderLoanSchedule(){
+  const list = loanSchedule || [];
+  const loanFilter = document.getElementById('schedFilterLoan').value;
+  const yearFilter = document.getElementById('schedFilterYear').value;
+  const statusFilter = document.getElementById('schedFilterStatus').value;
+
+  const filtered = list.filter(s => {
+    if (loanFilter !== 'all' && s.loanName !== loanFilter) return false;
+    if (statusFilter !== 'all' && s.status !== statusFilter) return false;
+    if (yearFilter !== 'all'){
+      const d = new Date(s.monthDate);
+      if (isNaN(d.getTime()) || d.getFullYear() !== parseInt(yearFilter,10)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('schedLoadedInfo').textContent = schedError
+    ? `Couldn't load schedule: ${schedError}`
+    : `Loaded ${list.length} schedule row${list.length===1?'':'s'} — showing ${filtered.length} matching filters.`;
+
+  const el = document.getElementById('loanScheduleList');
+  if (filtered.length === 0){
+    el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-bank"/></svg><p>${schedError ? 'Connection issue' : 'No schedule rows match these filters'}</p></div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(s => `
+    <div class="list-row">
+      <div style="flex:1;">
+        <div class="li-name">${s.loanName} — ${s.monthLabel}</div>
+      </div>
+      <span class="li-amt">₹${formatINR(s.amount)}</span>
+      <button class="btn ${s.status === 'Paid' ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleScheduleStatus(${s.row}, '${s.status === 'Paid' ? 'Pending' : 'Paid'}')">${s.status === 'Paid' ? 'Paid ✓' : 'Mark Paid'}</button>
+    </div>`).join('');
+}
+
+function toggleScheduleStatus(row, newStatus){
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateLoanScheduleStatus', row, status: newStatus }) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        const item = (loanSchedule || []).find(s => s.row === row);
+        if (item) item.status = newStatus;
+        renderLoanSchedule();
+        dashboardData = null;
+        showToast('Updated', 'success');
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+// =========================================================
+// RECEIVABLES
+// =========================================================
+function addReceivable(){
+  const data = {
+    action: 'addReceivable',
+    name: document.getElementById('recvName').value,
+    reason: document.getElementById('recvReason').value,
+    amount: document.getElementById('recvAmount').value,
+    dateGiven: document.getElementById('recvDate').value,
+    countsTowardBalance: document.getElementById('recvCounts').value,
+    notes: document.getElementById('recvNotes').value
+  };
+  if (!data.name || !data.amount || !data.dateGiven){
+    showToast('Please fill Name, Amount and Date Given', 'error');
+    return;
+  }
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        showToast('Receivable added', 'success');
+        document.getElementById('recvName').value = '';
+        document.getElementById('recvReason').value = '';
+        document.getElementById('recvAmount').value = '';
+        document.getElementById('recvDate').valueAsDate = new Date();
+        document.getElementById('recvCounts').value = 'No';
+        document.getElementById('recvNotes').value = '';
+        receivables = null;
+        dashboardData = null;
+        loadReceivables();
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+function loadReceivables(){
+  if (receivables !== null){ renderReceivables(); return; }
+  document.getElementById('receivablesList').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Loading receivables…</span></div>`;
+  recvError = null;
+  const params = new URLSearchParams({ action: 'getReceivables' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && Array.isArray(data.receivables)) receivables = data.receivables;
+      else { receivables = []; recvError = data.error || 'Could not load receivables.'; }
+    })
+    .catch(e => { receivables = null; recvError = e.message; })
+    .finally(() => { try { renderReceivables(); } catch(err){ console.error(err); } });
+}
+
+function refreshReceivables(){ receivables = null; loadReceivables(); }
+
+function renderReceivables(){
+  const list = receivables || [];
+  const statusFilter = document.getElementById('recvFilterStatus').value;
+  const countsFilter = document.getElementById('recvFilterCounts').value;
+
+  const filtered = list.filter(r => {
+    if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+    if (countsFilter !== 'all' && r.countsTowardBalance !== countsFilter) return false;
+    return true;
+  });
+
+  let pendingCounted = 0, pendingExcluded = 0, received = 0;
+  list.forEach(r => {
+    const amt = parseFloat(r.amount) || 0;
+    if (r.status === 'Pending'){ if (r.countsTowardBalance === 'Yes') pendingCounted += amt; else pendingExcluded += amt; }
+    else received += amt;
+  });
+  document.getElementById('recvSummary').innerHTML = `
+    <div class="stat-card accent"><div class="slabel">Pending (Counted)</div><div class="svalue">₹${formatINR(pendingCounted)}</div></div>
+    <div class="stat-card"><div class="slabel">Pending (Not Counted)</div><div class="svalue">₹${formatINR(pendingExcluded)}</div></div>
+    <div class="stat-card"><div class="slabel">Received</div><div class="svalue">₹${formatINR(received)}</div></div>
+    <div class="stat-card"><div class="slabel">Entries</div><div class="svalue">${list.length}</div></div>
+  `;
+
+  const el = document.getElementById('receivablesList');
+  if (filtered.length === 0){
+    el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-users"/></svg><p>${recvError ? 'Connection issue: ' + recvError : 'No receivables match these filters'}</p></div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.map(r => `
+    <div class="card ${r.status === 'Received' ? 'pos' : ''}">
+      <div class="card-header"><div class="card-title">${r.name}</div><div class="card-amount">₹${formatINR(r.amount)}</div></div>
+      <div class="card-meta">
+        <span>${r.dateGiven}</span>
+        <span class="badge ${r.status === 'Received' ? 'paid' : 'pending'}">${r.status}</span>
+        <span class="badge ${r.countsTowardBalance === 'Yes' ? 'neutral' : 'neutral'}">${r.countsTowardBalance === 'Yes' ? 'Counted' : 'Not counted'}</span>
+      </div>
+      ${r.reason ? `<div class="card-footer"><span class="desc">${r.reason}</span></div>` : ''}
+      <div class="card-footer">
+        ${r.status === 'Pending' ? `<button class="btn btn-primary btn-sm" onclick="markReceived(${r.row})">Mark Received</button>` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="toggleCounts(${r.row}, '${r.countsTowardBalance === 'Yes' ? 'No' : 'Yes'}')">${r.countsTowardBalance === 'Yes' ? 'Exclude from Balance' : 'Count Toward Balance'}</button>
+      </div>
+    </div>`).join('');
+}
+
+function markReceived(row){
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReceivable', row, status: 'Received' }) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        const item = (receivables || []).find(r => r.row === row);
+        if (item) item.status = 'Received';
+        renderReceivables();
+        dashboardData = null;
+        showToast('Marked received', 'success');
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+function toggleCounts(row, newVal){
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReceivable', row, countsTowardBalance: newVal }) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        const item = (receivables || []).find(r => r.row === row);
+        if (item) item.countsTowardBalance = newVal;
+        renderReceivables();
+        dashboardData = null;
+        showToast('Updated', 'success');
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+// =========================================================
+// STATEMENT UPLOAD — client-side decrypt/extract, AI parse, review, save
+// =========================================================
+let chosenFile = null;
+
+document.getElementById('dropZone').addEventListener('dragover', e => { e.preventDefault(); e.currentTarget.classList.add('drag'); });
+document.getElementById('dropZone').addEventListener('dragleave', e => e.currentTarget.classList.remove('drag'));
+document.getElementById('dropZone').addEventListener('drop', e => {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag');
+  if (e.dataTransfer.files.length) {
+    document.getElementById('stmtFile').files = e.dataTransfer.files;
+    onStatementFileChosen({ target: { files: e.dataTransfer.files } });
+  }
+});
+
+function onStatementFileChosen(event){
+  const file = event.target.files[0];
+  if (!file) return;
+  chosenFile = file;
+  document.getElementById('fileChipWrap').innerHTML = `
+    <div class="file-chip"><svg class="icon"><use href="#i-file"/></svg><span>${file.name}</span>
+      <button onclick="clearChosenFile()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-close"/></svg></button>
+    </div>`;
+}
+function clearChosenFile(){
+  chosenFile = null;
+  document.getElementById('stmtFile').value = '';
+  document.getElementById('fileChipWrap').innerHTML = '';
+}
+
+function extractStatement(){
+  if (!chosenFile){ showToast('Choose a PDF file first', 'error'); return; }
+  if (typeof pdfjsLib === 'undefined'){ showToast('PDF library failed to load — check your connection and reload', 'error'); return; }
+
+  const password = document.getElementById('stmtPassword').value;
+  const btn = document.getElementById('stmtExtractBtn');
+  btn.disabled = true;
+  document.getElementById('stmtProgress').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Reading PDF…</span></div>`;
+  document.getElementById('stmtReview').innerHTML = '';
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const arrayBuffer = e.target.result;
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer, password: password || undefined });
+    loadingTask.promise.then(pdf => {
+      const pagePromises = [];
+      for (let i = 1; i <= pdf.numPages; i++){
+        pagePromises.push(pdf.getPage(i).then(page => page.getTextContent()).then(tc => tc.items.map(it => it.str).join(' ')));
+      }
+      return Promise.all(pagePromises);
+    }).then(pagesText => {
+      const fullText = pagesText.join('\n');
+      if (fullText.trim().length < 40){
+        document.getElementById('stmtProgress').innerHTML = '';
+        btn.disabled = false;
+        showToast('Could not read text from this PDF — it may be a scanned image, which isn\'t supported yet', 'error');
+        return;
+      }
+      document.getElementById('stmtProgress').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Parsing transactions with AI…</span></div>`;
+      const source = document.getElementById('stmtSource').value;
+      fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'parseStatementText', text: fullText, source }) })
+        .then(r => r.json())
+        .then(result => {
+          btn.disabled = false;
+          document.getElementById('stmtProgress').innerHTML = '';
+          if (result.success && Array.isArray(result.transactions)){
+            renderReviewTable(result.transactions, source);
+          } else {
+            showToast('Parsing failed: ' + (result.error || 'unknown error'), 'error');
+          }
+        })
+        .catch(e => {
+          btn.disabled = false;
+          document.getElementById('stmtProgress').innerHTML = '';
+          showToast('Error: ' + e.message, 'error');
+        });
+    }).catch(err => {
+      btn.disabled = false;
+      document.getElementById('stmtProgress').innerHTML = '';
+      const msg = (err && err.name === 'PasswordException') ? 'Incorrect password for this PDF' : (err.message || 'Could not open this PDF');
+      showToast(msg, 'error');
+    });
+  };
+  reader.readAsArrayBuffer(chosenFile);
+}
+
+function renderReviewTable(transactions, source){
+  const catOptions = ['Uncategorized'].concat(categories.expenseCategories).map(c => `<option value="${c}">${c}</option>`).join('');
+  const html = transactions.map((tx, idx) => `
+    <div class="review-row" data-idx="${idx}">
+      <div class="rr-top">
+        <input type="checkbox" checked class="rr-include">
+        <span style="font-size:11px;color:var(--text-faint);flex:1;">Row ${idx + 1}</span>
+        <span class="badge ${tx.type === 'Credit' ? 'credit' : 'debit'}">${tx.type || 'Debit'}</span>
+      </div>
+      <div class="row">
+        <input type="date" class="rr-date" value="${tx.date || ''}">
+        <input type="number" class="rr-amount" step="0.01" value="${tx.amount || 0}">
+      </div>
+      <input type="text" class="rr-desc" value="${(tx.description || '').replace(/"/g,'&quot;')}">
+      <select class="rr-category">${catOptions}</select>
+    </div>`).join('');
+
+  document.getElementById('stmtReview').innerHTML = `
+    <div class="panel form-wide">
+      <div class="section-title" style="margin-top:0;">Review ${transactions.length} Extracted Transaction${transactions.length === 1 ? '' : 's'}</div>
+      <div class="view-caption">Uncheck any row that shouldn't be saved, fix anything the AI misread, then save.</div>
+      <div id="reviewRowsWrap">${html}</div>
+      <button class="btn btn-primary" onclick="saveReviewedTransactions('${source}')"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save Selected</button>
+    </div>`;
+}
+
+function saveReviewedTransactions(source){
+  const rows = document.querySelectorAll('#reviewRowsWrap .review-row');
+  const transactions = [];
+  rows.forEach(row => {
+    if (!row.querySelector('.rr-include').checked) return;
+    transactions.push({
+      date: row.querySelector('.rr-date').value,
+      amount: row.querySelector('.rr-amount').value,
+      description: row.querySelector('.rr-desc').value,
+      type: row.querySelector('.review-row .badge') ? (row.querySelector('.rr-top .badge').textContent) : 'Debit',
+      category: row.querySelector('.rr-category').value
+    });
+  });
+  if (transactions.length === 0){ showToast('No rows selected', 'error'); return; }
+
+  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveStatementTransactions', transactions, source }) })
+    .then(r => r.json())
+    .then(result => {
+      if (result.success){
+        showToast(transactions.length + ' transactions saved', 'success');
+        document.getElementById('stmtReview').innerHTML = '';
+        clearChosenFile();
+        document.getElementById('stmtPassword').value = '';
+        statementTransactions = null;
+      } else showToast('Error: ' + result.error, 'error');
+    })
+    .catch(e => showToast('Error: ' + e.message, 'error'));
+}
+
+// =========================================================
+// STATEMENT HISTORY
+// =========================================================
+function loadStatementHistory(){
+  if (statementTransactions !== null){ renderStatementHistory(); return; }
+  document.getElementById('stmtHistoryList').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Loading statement history…</span></div>`;
+  document.getElementById('stmtHistorySummary').innerHTML = '';
+  stmtError = null;
+  const params = new URLSearchParams({ action: 'getStatementTransactions' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      if (data.success && Array.isArray(data.transactions)){
+        statementTransactions = data.transactions;
+        populateStmtYearFilter();
+      } else { statementTransactions = []; stmtError = data.error || 'Could not load statement history.'; }
+    })
+    .catch(e => { statementTransactions = null; stmtError = e.message; })
+    .finally(() => { try { renderStatementHistory(); } catch(err){ console.error(err); } });
+}
+function refreshStatementHistory(){ statementTransactions = null; loadStatementHistory(); }
+
+function populateStmtYearFilter(){
+  const sel = document.getElementById('stmtFilterYear');
+  const current = sel.value;
+  const years = new Set();
+  (statementTransactions || []).forEach(tx => { const d = new Date(tx.rawDate || tx.date); if (!isNaN(d.getTime())) years.add(d.getFullYear()); });
+  const sorted = Array.from(years).sort((a,b) => b - a);
+  sel.innerHTML = '<option value="all">All Years</option>' + sorted.map(y => `<option value="${y}">${y}</option>`).join('');
+  if (sorted.includes(parseInt(current,10))) sel.value = current;
+}
+
+function renderStatementHistory(){
+  const list = statementTransactions || [];
+  const sourceFilter = document.getElementById('stmtFilterSource').value;
+  const typeFilter = document.getElementById('stmtFilterType').value;
+  const yearFilter = document.getElementById('stmtFilterYear').value;
+  const search = document.getElementById('stmtFilterSearch').value.trim().toLowerCase();
+
+  const filtered = list.filter(tx => {
+    if (sourceFilter !== 'all' && tx.source !== sourceFilter) return false;
+    if (typeFilter !== 'all' && tx.type !== typeFilter) return false;
+    if (search && !(tx.description || '').toLowerCase().includes(search)) return false;
+    if (yearFilter !== 'all'){
+      const d = new Date(tx.rawDate || tx.date);
+      if (isNaN(d.getTime()) || d.getFullYear() !== parseInt(yearFilter,10)) return false;
+    }
+    return true;
+  });
+
+  document.getElementById('stmtLoadedInfo').textContent = stmtError
+    ? `Couldn't load history: ${stmtError}`
+    : `Loaded ${list.length} transaction${list.length===1?'':'s'} — showing ${filtered.length} matching filters.`;
+
+  let debit = 0, credit = 0;
+  filtered.forEach(tx => { const amt = parseFloat(tx.amount) || 0; if (tx.type === 'Credit') credit += amt; else debit += amt; });
+  document.getElementById('stmtHistorySummary').innerHTML = `
+    <div class="stat-card danger"><div class="slabel">Debit</div><div class="svalue">₹${formatINR(debit)}</div></div>
+    <div class="stat-card accent"><div class="slabel">Credit</div><div class="svalue">₹${formatINR(credit)}</div></div>
+    <div class="stat-card"><div class="slabel">Net</div><div class="svalue">₹${formatINR(credit - debit)}</div></div>
+    <div class="stat-card"><div class="slabel">Entries</div><div class="svalue">${filtered.length}</div></div>
+  `;
+
+  const el = document.getElementById('stmtHistoryList');
+  if (filtered.length === 0){
+    el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-upload"/></svg><p>No transactions match these filters</p></div>`;
+    return;
+  }
+
+  const html = filtered.slice().reverse().map(tx => `
+    <div class="card ${tx.type === 'Credit' ? 'pos' : 'neg'}">
+      <div class="card-header"><div class="card-title">${tx.description || 'Transaction'}</div><div class="card-amount ${tx.type === 'Credit' ? 'pos' : 'neg'}">${tx.type === 'Credit' ? '+' : '-'}₹${formatINR(tx.amount)}</div></div>
+      <div class="card-meta"><span>${tx.date}</span><span class="badge neutral">${tx.source}</span><span class="badge neutral">${tx.category}</span></div>
+    </div>`).join('');
+  el.innerHTML = html + (GOOGLE_SHEET_URL ? `<button class="btn btn-secondary" style="margin-top:4px;" onclick="window.open('${GOOGLE_SHEET_URL}', '_blank')"><svg class="icon" style="width:14px;height:14px;"><use href="#i-notes"/></svg>Show More in Google Sheet</button>` : '');
+}
+</script>
+</body>
+</html>
