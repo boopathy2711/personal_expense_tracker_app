@@ -7,8 +7,14 @@
 <meta name="description" content="Clarity — personal finance tracker">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Clarity">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Clarity — Personal Finance</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -42,9 +48,36 @@
     --font-body:'IBM Plex Sans', sans-serif;
     --font-data:'IBM Plex Mono', monospace;
   }
+  :root[data-theme="dark"]{
+    --bg:#0C1018;
+    --surface:#141A26;
+    --surface-2:#1A2130;
+    --surface-3:#212A3C;
+    --border:#2B3547;
+    --text:#E7ECF6;
+    --text-soft:#98A3BC;
+    --text-faint:#5E6981;
+    --accent:#5B8DFF;
+    --accent-dim:rgba(91,141,255,0.16);
+    --accent-2:#9B87F5;
+    --on-accent:#0C1018;
+    --warn:#F0A93E;
+    --warn-dim:rgba(240,169,62,0.16);
+    --danger:#FF6B6B;
+    --danger-dim:rgba(255,107,107,0.16);
+    --success:#34D399;
+    --success-dim:rgba(52,211,153,0.16);
+    --shadow-sm:0 1px 3px rgba(0,0,0,0.35);
+    --shadow-md:0 8px 24px rgba(0,0,0,0.45);
+    --shadow-lg:0 18px 44px rgba(0,0,0,0.55);
+  }
+  :root[data-theme="dark"] select{color-scheme:dark;}
+  html{background:var(--bg);}
+  html, body{transition:background-color .25s ease;}
+  *{transition:background-color .15s ease, border-color .15s ease, color .15s ease;}
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
   html,body{height:100%;}
-  body{font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;}
+  body{font-family:var(--font-body);background:var(--bg);background-image:radial-gradient(circle at top left, rgba(37,99,235,0.05), transparent 45%);color:var(--text);-webkit-font-smoothing:antialiased;}
   button, select, input, textarea{font-family:inherit;}
   .icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;flex:none;}
   .icon-fill{fill:currentColor;stroke:none;}
@@ -58,7 +91,7 @@
     display:none;flex-direction:column;padding:20px 14px;flex:none;
   }
   .brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px;}
-  .brand-mark{width:32px;height:32px;flex:none;}
+  .brand-mark{width:32px;height:32px;flex:none;filter:drop-shadow(0 2px 5px rgba(37,99,235,0.18));}
   .brand-text .name{font-size:17px;font-weight:700;letter-spacing:0.2px;line-height:1;}
   .brand-text .tag{font-size:10px;color:var(--text-faint);letter-spacing:.4px;margin-top:3px;}
   .side-nav{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
@@ -76,7 +109,10 @@
   .topbar{
     display:flex;align-items:center;justify-content:space-between;padding:14px 16px;
     background:var(--surface);border-bottom:1px solid var(--border);flex:none;
+    position:relative;box-shadow:var(--shadow-sm);z-index:2;
   }
+  .topbar::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;
+    background:linear-gradient(90deg, var(--accent), var(--accent-2));opacity:.55;}
   .topbar-left{display:flex;align-items:center;gap:10px;}
   .topbar-left .brand-mark{width:28px;height:28px;}
   .topbar-left .page-title{font-weight:700;font-size:16px;}
@@ -88,8 +124,17 @@
   .device-toggle button .icon{width:14px;height:14px;}
   .device-toggle button.active{background:var(--accent);color:var(--on-accent);}
 
+  .theme-toggle{
+    background:var(--surface-2);border:1px solid var(--border);color:var(--text-soft);
+    width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;flex:none;transition:background .15s,color .15s,transform .15s;
+  }
+  .theme-toggle:hover{color:var(--accent);}
+  .theme-toggle:active{transform:scale(0.92);}
+  .theme-toggle .icon{width:16px;height:16px;}
+
   .quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px 16px;background:var(--bg);flex:none;}
-  .qstat{background:var(--surface);border-radius:var(--radius-sm);padding:10px 8px;border:1px solid var(--border);text-align:center;}
+  .qstat{background:var(--surface);border-radius:var(--radius-sm);padding:10px 8px;border:1px solid var(--border);text-align:center;box-shadow:var(--shadow-sm);}
   .qstat .qlabel{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--text-faint);font-weight:600;}
   .qstat .qvalue{font-family:var(--font-data);font-size:14px;font-weight:700;margin-top:3px;color:var(--text);}
   .qstat.accent .qvalue{color:var(--accent);}
@@ -114,7 +159,7 @@
   .view-head h2 .icon{color:var(--accent);width:19px;height:19px;}
   .view-caption{font-size:11px;color:var(--text-faint);margin-top:-8px;margin-bottom:14px;}
 
-  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
 
   .form-group{margin-bottom:12px;}
   label{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-weight:600;color:var(--text-soft);font-size:11px;text-transform:uppercase;letter-spacing:.3px;}
@@ -136,7 +181,7 @@
   }
   .btn:active:not(:disabled){transform:scale(0.98);}
   .btn:disabled{opacity:.45;cursor:not-allowed;}
-  .btn-primary{background:var(--accent);color:var(--on-accent);}
+  .btn-primary{background:linear-gradient(135deg, var(--accent), var(--accent-2));color:var(--on-accent);box-shadow:0 4px 14px rgba(37,99,235,0.28);}
   .btn-primary:hover{filter:brightness(1.08);}
   .btn-secondary{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border);}
   .btn-add{background:var(--accent-dim);color:var(--accent);border:1.5px dashed var(--accent);}
@@ -150,7 +195,7 @@
   .badge.credit{background:var(--success-dim);color:var(--success);}
   .badge.neutral{background:var(--surface-3);color:var(--text-soft);}
 
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:9px;border-left:3px solid transparent;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:9px;border-left:3px solid transparent;box-shadow:var(--shadow-sm);}
   .card.pos{border-left-color:var(--success);}
   .card.neg{border-left-color:var(--danger);}
   .card-header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
@@ -169,7 +214,7 @@
   .section-title{font-size:10.5px;font-weight:700;color:var(--text-faint);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:7px;}
 
   .subtab-toggle{display:inline-flex;gap:2px;background:var(--surface-2);padding:4px;border-radius:999px;border:1px solid var(--border);margin-bottom:16px;}
-  .subtab-btn{background:none;border:none;padding:7px 14px;border-radius:999px;cursor:pointer;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-faint);}
+  .subtab-btn{background:none;border:none;padding:7px 14px;border-radius:999px;cursor:pointer;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--text-faint);display:inline-flex;align-items:center;justify-content:center;gap:5px;}
   .subtab-btn.active{background:var(--accent);color:var(--on-accent);}
   .subtab-panel{display:none;}
   .subtab-panel.active{display:block;}
@@ -192,7 +237,7 @@
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 
   .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;}
-  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow-sm);}
   .stat-card .slabel{font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.4px;display:flex;align-items:center;gap:6px;}
   .stat-card .svalue{font-family:var(--font-data);font-size:18px;font-weight:700;margin-top:5px;}
   .stat-card.accent{border-color:var(--accent);}
@@ -321,6 +366,10 @@
   <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11A8 8 0 006 6.3L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0014 4.7l2-2.7"/><path d="M20 20v-4h-4"/></symbol>
   <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></symbol>
   <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle class="icon-fill" cx="4.5" cy="6" r="1"/><circle class="icon-fill" cx="4.5" cy="12" r="1"/><circle class="icon-fill" cx="4.5" cy="18" r="1"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4.5h13l-2.5 4.2L18 13H5"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5V7"/><path d="M6 7l1 13a2 2 0 002 2h6a2 2 0 002-2l1-13"/><path d="M10 11v6M14 11v6"/></symbol>
 </svg>
 
 <div class="app" id="app">
@@ -352,6 +401,7 @@
         <div><div class="page-title" id="pageTitle">Dashboard</div><div class="page-sub" id="pageSub">Clarity · Personal Finance</div></div>
       </div>
       <div class="topbar-right">
+        <button class="theme-toggle" id="themeToggleBtn" title="Toggle theme"><svg class="icon" id="themeToggleIcon"><use href="#i-moon"/></svg></button>
         <div class="device-toggle" id="deviceToggle">
           <button data-mode="mobile" title="Mobile view"><svg class="icon"><use href="#i-mobile"/></svg></button>
           <button data-mode="desktop" title="Desktop view"><svg class="icon"><use href="#i-desktop"/></svg></button>
@@ -393,6 +443,11 @@
             <h3><svg class="icon"><use href="#i-users"/></svg>Receivables Snapshot</h3>
             <div class="list-row"><span class="li-name">Counted toward balance</span><span class="li-amt" id="dashRecvCounted" style="color:var(--success);">₹0</span></div>
             <div class="list-row"><span class="li-name">Not counted (later)</span><span class="li-amt" id="dashRecvExcluded" style="color:var(--text-faint);">₹0</span></div>
+          </div>
+          <div class="panel panel-wide">
+            <h3><svg class="icon"><use href="#i-flag"/></svg>Upcoming Payments</h3>
+            <div id="dashUpcomingCaption" style="font-size:11px;color:var(--text-faint);margin:-6px 0 10px;">Loading…</div>
+            <div id="dashUpcomingList"></div>
           </div>
         </div>
       </section>
@@ -561,6 +616,20 @@
         <div class="view-head"><h2><svg class="icon"><use href="#i-gear"/></svg>Settings</h2></div>
 
         <div class="panel form-wide">
+          <div class="section-title" style="margin-top:0;">Appearance</div>
+          <div class="row" style="align-items:center;grid-template-columns:1fr auto;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Theme</div>
+              <div class="view-caption" style="margin:2px 0 0;">Choose how Clarity looks on this device</div>
+            </div>
+            <div class="subtab-toggle" id="themeToggleGroup" style="margin:0;">
+              <button class="subtab-btn" data-theme="light"><svg class="icon" style="width:12px;height:12px;"><use href="#i-sun"/></svg> Light</button>
+              <button class="subtab-btn" data-theme="dark"><svg class="icon" style="width:12px;height:12px;"><use href="#i-moon"/></svg> Dark</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel form-wide">
           <div class="section-title" style="margin-top:0;">Monthly Basics</div>
           <div class="row">
             <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Salary (₹)</label><input type="number" id="setSalary" step="0.01"></div>
@@ -637,6 +706,10 @@ if (typeof pdfjsLib !== 'undefined') {
 function formatINR(num){
   const n = Number(num) || 0;
   return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+function cssVar(name){
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
 function showToast(message, type) {
@@ -724,6 +797,35 @@ document.querySelectorAll('#deviceToggle button').forEach(btn => {
 });
 window.addEventListener('resize', () => { if (!deviceOverride) applyDeviceMode(); });
 applyDeviceMode();
+
+// =========================================================
+// THEME (Light / Dark)
+// =========================================================
+let currentTheme = localStorage.getItem('clarity_theme') || 'light';
+
+function applyTheme(){
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  document.querySelectorAll('#themeToggleGroup button[data-theme]').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-theme') === currentTheme);
+  });
+  const iconUse = document.querySelector('#themeToggleIcon use');
+  if (iconUse) iconUse.setAttribute('href', currentTheme === 'dark' ? '#i-sun' : '#i-moon');
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', cssVar('--bg') || (currentTheme === 'dark' ? '#0C1018' : '#F6F8FC'));
+  // Re-render any live charts so their colors match the new theme
+  if (dashboardData){ loadExpenseCategoryChart(); loadTrendChart(); }
+}
+function setTheme(t){
+  currentTheme = t === 'dark' ? 'dark' : 'light';
+  localStorage.setItem('clarity_theme', currentTheme);
+  applyTheme();
+}
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+if (themeToggleBtn) themeToggleBtn.addEventListener('click', () => setTheme(currentTheme === 'dark' ? 'light' : 'dark'));
+document.querySelectorAll('#themeToggleGroup button[data-theme]').forEach(btn => {
+  btn.addEventListener('click', () => setTheme(btn.getAttribute('data-theme')));
+});
+applyTheme();
 
 // =========================================================
 // INITIAL LOAD
@@ -922,6 +1024,55 @@ function renderDashboard(d){
 
   loadExpenseCategoryChart();
   loadTrendChart();
+  loadUpcomingPayments();
+}
+
+function loadUpcomingPayments(){
+  const captionEl = document.getElementById('dashUpcomingCaption');
+  if (captionEl) captionEl.textContent = 'Loading…';
+  const params = new URLSearchParams({ action: 'getExpenses' });
+  fetch(DEPLOYMENT_URL + '?' + params)
+    .then(r => r.json())
+    .then(data => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const upcoming = (data.expenses || []).filter(ex => {
+        const d = new Date(ex.rawDate || ex.date);
+        if (isNaN(d.getTime())) return false;
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() > today.getTime();
+      }).sort((a, b) => new Date(a.rawDate || a.date) - new Date(b.rawDate || b.date));
+      renderUpcomingPayments(upcoming);
+    })
+    .catch(() => renderUpcomingPayments(null));
+}
+
+function renderUpcomingPayments(list){
+  const captionEl = document.getElementById('dashUpcomingCaption');
+  const listEl = document.getElementById('dashUpcomingList');
+  if (!captionEl || !listEl) return;
+
+  if (list === null){
+    captionEl.textContent = 'Could not load upcoming payments.';
+    listEl.innerHTML = '';
+    return;
+  }
+  if (list.length === 0){
+    captionEl.textContent = 'Nothing dated ahead yet — add an expense with a future date (e.g. a September bill logged in August) and it will show up here automatically.';
+    listEl.innerHTML = '';
+    return;
+  }
+
+  const total = list.reduce((s, ex) => s + (parseFloat(ex.amount) || 0), 0);
+  captionEl.textContent = `₹${formatINR(total)} across ${list.length} upcoming expense${list.length === 1 ? '' : 's'}, based on the dates you set in Add Expense`;
+
+  const shown = list.slice(0, 8);
+  listEl.innerHTML = shown.map(ex => `
+    <div class="card">
+      <div class="card-header"><div class="card-title">${ex.category || 'Uncategorized'}</div><div class="card-amount neg">-₹${formatINR(ex.amount)}</div></div>
+      <div class="card-meta"><span>${ex.date}</span>${ex.paymentMethod ? `<span class="badge neutral">${ex.paymentMethod}</span>` : ''}</div>
+      ${ex.description ? `<div class="card-footer"><span class="desc">${ex.description}</span></div>` : ''}
+    </div>`).join('') + (list.length > shown.length ? `<div style="font-size:11px;color:var(--text-faint);margin-top:4px;">+${list.length - shown.length} more upcoming</div>` : '');
 }
 
 function colorForIndex(i){ return CATEGORY_PALETTE[i % CATEGORY_PALETTE.length]; }
@@ -971,7 +1122,7 @@ function renderDonut(canvasId, legendId, dataObj, total){
     if (charts[canvasId]) charts[canvasId].destroy();
     charts[canvasId] = new Chart(canvasEl.getContext('2d'), {
       type: 'doughnut',
-      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: '#FFFFFF' }] },
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 2, borderColor: cssVar('--surface') || '#FFFFFF' }] },
       options: { maintainAspectRatio: false, cutout: '62%', plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ₹' + formatINR(c.parsed) } } } }
     });
   }
@@ -1015,19 +1166,21 @@ function loadTrendChart(){
       return;
     }
     if (charts['chartTrend']) charts['chartTrend'].destroy();
+    const tickColor = cssVar('--text-soft') || '#5B6478';
+    const gridColor = cssVar('--border') || '#E1E6F0';
     charts['chartTrend'] = new Chart(canvasEl.getContext('2d'), {
       type: 'bar',
       data: {
         labels: months.map(m => m.label),
         datasets: [
-          { label: 'Expenses', data: months.map(m => m.expense), backgroundColor: '#DC2626', borderRadius: 5 },
-          { label: 'EMI', data: months.map(m => m.emi), backgroundColor: '#D97706', borderRadius: 5 }
+          { label: 'Expenses', data: months.map(m => m.expense), backgroundColor: cssVar('--danger') || '#DC2626', borderRadius: 5 },
+          { label: 'EMI', data: months.map(m => m.emi), backgroundColor: cssVar('--warn') || '#D97706', borderRadius: 5 }
         ]
       },
       options: {
         maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true, ticks: { color: '#5B6478', callback: v => '₹' + formatINR(v) }, grid: { color: '#E1E6F0' } }, x: { ticks: { color: '#5B6478' }, grid: { display: false } } },
-        plugins: { legend: { position: 'bottom', labels: { color: '#5B6478', boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ₹${formatINR(c.parsed.y)}` } } }
+        scales: { y: { beginAtZero: true, ticks: { color: tickColor, callback: v => '₹' + formatINR(v) }, grid: { color: gridColor } }, x: { ticks: { color: tickColor }, grid: { display: false } } },
+        plugins: { legend: { position: 'bottom', labels: { color: tickColor, boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ₹${formatINR(c.parsed.y)}` } } }
       }
     });
   }).catch(e => {});
