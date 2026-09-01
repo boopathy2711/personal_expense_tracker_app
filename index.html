@@ -1188,7 +1188,7 @@ function loadDashboard(){
 }
 function renderQuickStats(d){
   document.getElementById('qsBalance').textContent = '₹' + formatINR(d.balance);
-  document.getElementById('qsIncome').textContent = '₹' + formatINR(d.salaryThisMonth);
+  document.getElementById('qsIncome').textContent = '₹' + formatINR(d.totalSalaryReceived);
   document.getElementById('qsSpent').textContent = '₹' + formatINR(d.spent);
   document.getElementById('qsUpcoming').textContent = '₹' + formatINR(d.upcomingUnpaid);
   document.getElementById('sideBalance').textContent = '₹' + formatINR(d.balance);
@@ -1196,7 +1196,7 @@ function renderQuickStats(d){
 }
 function renderDashboard(d){
   document.getElementById('dashSummary').innerHTML = `
-    <div class="stat-card"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-wallet"/></svg>Salary This Month</div><div class="svalue">₹${formatINR(d.salaryThisMonth)}</div></div>
+    <div class="stat-card"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-wallet"/></svg>Salary This Month</div><div class="svalue">₹${formatINR(d.totalSalaryReceived)}</div></div>
     <div class="stat-card danger"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-down"/></svg>Paid Expenses</div><div class="svalue">₹${formatINR(d.thisMonthExpenses)}</div></div>
     <div class="stat-card warn"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-bank"/></svg>EMI Due</div><div class="svalue">₹${formatINR(d.thisMonthEMI)}</div></div>
     <div class="stat-card accent"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-up"/></svg>Projected Balance after pending payments</div><div class="svalue">₹${formatINR(d.projectedBalance)}</div></div>
