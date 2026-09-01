@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#F4EFE1">
+<meta name="theme-color" content="#F2EFE8">
 <meta name="description" content="Clarity — personal finance tracker">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Clarity">
@@ -15,55 +15,55 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root{
-    --bg:#F2EEE0;
-    --header-1:#1B2340;
-    --header-2:#3B4A7D;
+    --bg:#F2EFE8;
+    --header-1:#221E27;
+    --header-2:#453B4E;
     --surface:#FFFFFF;
-    --surface-2:#FBF9F1;
-    --surface-3:#EFE9D6;
-    --border:#E1D8BC;
-    --text:#221F2E;
-    --text-soft:#6B6558;
-    --text-faint:#9A9384;
-    --accent:#B9791E;
-    --accent-dim:rgba(185,121,30,0.12);
-    --accent-2:#3B4A7D;
+    --surface-2:#FAF8F3;
+    --surface-3:#EFEAE0;
+    --border:#E2DCCC;
+    --text:#221F26;
+    --text-soft:#6C6459;
+    --text-faint:#9C9384;
+    --accent:#AD8235;
+    --accent-dim:rgba(173,130,53,0.12);
+    --accent-2:#453B4E;
     --on-accent:#FFFFFF;
-    --warn:#A9691F;
-    --warn-dim:rgba(169,105,31,0.14);
-    --danger:#A83E2A;
-    --danger-dim:rgba(168,62,42,0.10);
-    --success:#2E7D52;
-    --success-dim:rgba(46,125,82,0.10);
-    --shadow-sm:0 1px 2px rgba(27,35,64,0.07);
-    --shadow-md:0 8px 24px rgba(27,35,64,0.09);
-    --shadow-lg:0 18px 40px rgba(27,35,64,0.18);
+    --warn:#9C7A2E;
+    --warn-dim:rgba(156,122,46,0.14);
+    --danger:#A8422E;
+    --danger-dim:rgba(168,66,46,0.10);
+    --success:#2E7A64;
+    --success-dim:rgba(46,122,100,0.10);
+    --shadow-sm:0 1px 2px rgba(34,30,38,0.06);
+    --shadow-md:0 8px 24px rgba(34,30,38,0.08);
+    --shadow-lg:0 18px 40px rgba(34,30,38,0.16);
     --radius:14px;
     --radius-sm:10px;
     --font-display:'Lora', serif;
     --font-body:'IBM Plex Sans', sans-serif;
   }
   :root[data-theme="dark"]{
-    --bg:#12141F;
-    --header-1:#0C0F1C;
-    --header-2:#2A3560;
-    --surface:#191C2C;
-    --surface-2:#1F2336;
-    --surface-3:#272B41;
-    --border:#343A5C;
-    --text:#E9E6DA;
-    --text-soft:#A6A2B8;
-    --text-faint:#6B6883;
-    --accent:#E0A64C;
-    --accent-dim:rgba(224,166,76,0.16);
-    --accent-2:#57699F;
-    --on-accent:#12141F;
-    --warn:#E0A64C;
-    --warn-dim:rgba(224,166,76,0.16);
+    --bg:#15131A;
+    --header-1:#0E0C12;
+    --header-2:#332B3C;
+    --surface:#1C1922;
+    --surface-2:#221E29;
+    --surface-3:#2A2531;
+    --border:#3A3342;
+    --text:#EAE6DD;
+    --text-soft:#A8A199;
+    --text-faint:#6E6773;
+    --accent:#D4A24E;
+    --accent-dim:rgba(212,162,78,0.16);
+    --accent-2:#6B5D7A;
+    --on-accent:#15131A;
+    --warn:#D4A24E;
+    --warn-dim:rgba(212,162,78,0.16);
     --danger:#E0725A;
     --danger-dim:rgba(224,114,90,0.16);
-    --success:#4CAE85;
-    --success-dim:rgba(76,174,133,0.16);
+    --success:#48AB8C;
+    --success-dim:rgba(72,171,140,0.16);
     --shadow-sm:0 1px 3px rgba(0,0,0,0.4);
     --shadow-md:0 8px 24px rgba(0,0,0,0.5);
     --shadow-lg:0 18px 44px rgba(0,0,0,0.6);
@@ -80,13 +80,15 @@
   .icon{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;display:block;flex:none;}
   .icon-fill{fill:currentColor;stroke:none;}
 
+  @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
+
   /* ===== SHELL ===== */
   .app{display:flex;background:var(--bg);min-height:100vh;position:relative;}
   .main{flex:1;display:flex;flex-direction:column;min-width:0;}
 
   .sidebar{width:236px;background:var(--surface);border-right:1px solid var(--border);display:none;flex-direction:column;padding:20px 14px;flex:none;}
   .brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px;}
-  .brand-mark{width:34px;height:34px;flex:none;border-radius:9px;background:linear-gradient(150deg,var(--header-2),var(--header-1));display:flex;align-items:center;justify-content:center;color:#EAE6D8;font-family:var(--font-display);font-weight:700;font-size:17px;box-shadow:var(--shadow-sm);}
+  .brand-mark{width:34px;height:34px;flex:none;border-radius:9px;background:linear-gradient(150deg,var(--header-2),var(--header-1));display:flex;align-items:center;justify-content:center;color:#F0ECE3;font-family:var(--font-display);font-weight:700;font-size:17px;box-shadow:var(--shadow-sm);}
   .brand-text .name{font-family:var(--font-display);font-size:19px;font-weight:700;letter-spacing:0.2px;line-height:1;}
   .brand-text .tag{font-size:10px;color:var(--text-faint);letter-spacing:.4px;margin-top:3px;}
   .side-nav{display:flex;flex-direction:column;gap:2px;margin-top:6px;}
@@ -97,18 +99,18 @@
   .sidebar-foot .foot-label{font-size:9.5px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;}
   .sidebar-foot .foot-value{font-family:var(--font-body);font-size:19px;font-weight:700;color:var(--accent);}
 
-  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 16px;background:linear-gradient(120deg,var(--header-1),var(--header-2));flex:none;position:relative;z-index:2;color:#EDEAD9;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 16px;background:linear-gradient(120deg,var(--header-1),var(--header-2));flex:none;position:relative;z-index:2;color:#EDEAE0;}
   .topbar-left{display:flex;align-items:center;gap:11px;}
-  .topbar-left .page-title{font-family:var(--font-display);font-weight:700;font-size:20px;color:#F4F1E4;}
-  .topbar-left .page-sub{font-size:11px;color:#B9C4B4;margin-top:1px;}
+  .topbar-left .page-title{font-family:var(--font-display);font-weight:700;font-size:20px;color:#F5F2E9;}
+  .topbar-left .page-sub{font-size:11px;color:#BDB6AE;margin-top:1px;}
   .topbar-right{display:flex;align-items:center;gap:10px;}
 
   .device-toggle{display:flex;background:rgba(255,255,255,0.12);border-radius:999px;padding:3px;gap:2px;}
-  .device-toggle button{background:none;border:none;color:rgba(237,234,217,0.6);width:30px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .device-toggle button{background:none;border:none;color:rgba(237,234,224,0.6);width:30px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
   .device-toggle button .icon{width:14px;height:14px;}
-  .device-toggle button.active{background:#EDEAD9;color:var(--header-1);}
+  .device-toggle button.active{background:#F0ECE3;color:var(--header-1);}
 
-  .theme-toggle{background:rgba(255,255,255,0.12);border:none;color:#EDEAD9;width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;}
+  .theme-toggle{background:rgba(255,255,255,0.12);border:none;color:#EDEAE0;width:34px;height:34px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;}
   .theme-toggle .icon{width:16px;height:16px;}
 
   .quick-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:14px 16px;background:var(--bg);flex:none;}
@@ -131,9 +133,13 @@
   .view-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
   .view-head h2{font-family:var(--font-display);font-weight:700;font-size:20px;display:flex;align-items:center;gap:9px;}
   .view-head h2 .icon{color:var(--accent);width:19px;height:19px;}
-  .view-caption{font-size:11.5px;color:var(--text-faint);margin-top:-8px;margin-bottom:14px;}
+  .view-caption{font-size:11.5px;color:var(--text-faint);margin-top:-8px;margin-bottom:14px;line-height:1.5;}
 
   .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
+
+  /* Scroll reveal — dashboard only */
+  .reveal{opacity:0;transform:translateY(14px);transition:opacity .5s ease, transform .5s ease;}
+  .reveal.revealed{opacity:1;transform:translateY(0);}
 
   .form-group{margin-bottom:12px;}
   label{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-weight:600;color:var(--text-soft);font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
@@ -147,12 +153,14 @@
 
   .btn{width:100%;padding:12px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:8px;}
   .btn:active:not(:disabled){transform:scale(0.98);}
-  .btn:disabled{opacity:.45;cursor:not-allowed;}
-  .btn-primary{background:linear-gradient(120deg,var(--header-2),var(--accent));color:var(--on-accent);box-shadow:0 4px 14px rgba(30,111,70,0.28);}
+  .btn:disabled{opacity:.55;cursor:not-allowed;}
+  .btn-primary{background:linear-gradient(120deg,var(--header-2),var(--accent));color:var(--on-accent);box-shadow:0 4px 14px rgba(173,130,53,0.28);}
   .btn-secondary{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border);}
   .btn-add{background:var(--accent-dim);color:var(--accent);border:1.5px dashed var(--accent);}
   .btn-danger{background:var(--danger-dim);color:var(--danger);border:1.5px solid var(--danger);}
   .btn-sm{width:auto;padding:8px 13px;font-size:10.5px;}
+  .btn-spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .6s linear infinite;flex:none;}
+  .btn-secondary .btn-spinner, .btn-add .btn-spinner{border-color:rgba(108,100,89,0.3);border-top-color:var(--text-soft);}
 
   .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;}
   .badge.pending{background:var(--warn-dim);color:var(--warn);}
@@ -209,15 +217,14 @@
   .stat-card.danger{border-color:var(--danger);}
   .stat-card.danger .svalue{color:var(--danger);}
 
-  /* Dark hero stat tiles (Income / Expense / Net / Entries look) */
   .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-  .hero-tile{border-radius:var(--radius);padding:16px;color:#F4F1E4;box-shadow:var(--shadow-sm);}
+  .hero-tile{border-radius:var(--radius);padding:16px;color:#F5F2E9;box-shadow:var(--shadow-sm);}
   .hero-tile .hlabel{font-size:10px;text-transform:uppercase;letter-spacing:.6px;opacity:.85;display:flex;align-items:center;gap:6px;}
   .hero-tile .hvalue{font-family:var(--font-body);font-size:22px;font-weight:700;margin-top:8px;}
-  .hero-tile.income{background:linear-gradient(140deg,#2E7D52,#194E33);}
-  .hero-tile.expense{background:linear-gradient(140deg,#A83E2A,#6E2A1B);}
-  .hero-tile.net{background:linear-gradient(140deg,#3B4A7D,#1B2340);}
-  .hero-tile.entries{background:linear-gradient(140deg,#3B4A7D,#1B2340);}
+  .hero-tile.income{background:linear-gradient(140deg,#2E7A64,#194E3F);}
+  .hero-tile.expense{background:linear-gradient(140deg,#A8422E,#6E2A1E);}
+  .hero-tile.net{background:linear-gradient(140deg,#453B4E,#221E27);}
+  .hero-tile.entries{background:linear-gradient(140deg,#453B4E,#221E27);}
 
   .chart-grid{display:grid;grid-template-columns:1fr;gap:14px;}
   .panel h3{font-family:var(--font-display);font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:7px;color:var(--text);}
@@ -236,7 +243,6 @@
   .list-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
   .list-row:last-child{border-bottom:none;}
   .list-row .li-name{flex:1;font-size:12px;font-weight:500;}
-  .list-row .li-sub{font-size:10.5px;color:var(--text-faint);}
   .list-row .li-amt{font-family:var(--font-body);font-weight:700;font-size:12px;}
 
   .review-row{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin-bottom:8px;display:flex;flex-direction:column;gap:7px;}
@@ -254,22 +260,31 @@
   .file-chip .icon{color:var(--accent);}
   .file-chip button{margin-left:auto;background:none;border:none;color:var(--text-faint);cursor:pointer;}
 
-  /* Upcoming expense rows */
+  /* Upcoming rows — status shown as a clear pill, no checkbox/strikethrough */
   .upcoming-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 12px;margin-bottom:8px;}
-  .upcoming-row.is-paid{opacity:.55;}
-  .upcoming-row .ur-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:none;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:transparent;}
-  .upcoming-row .ur-check.checked{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .upcoming-row .ur-check .icon{width:12px;height:12px;}
+  .upcoming-row.is-paid{background:var(--surface-2);}
   .upcoming-row .ur-body{flex:1;min-width:0;}
   .upcoming-row .ur-title{font-weight:600;font-size:13px;}
-  .upcoming-row .ur-title.is-paid{text-decoration:line-through;}
-  .upcoming-row .ur-meta{font-size:10.5px;color:var(--text-faint);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap;}
+  .upcoming-row .ur-meta{font-size:10.5px;color:var(--text-faint);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;}
   .upcoming-row .ur-amt{font-family:var(--font-body);font-weight:700;font-size:13px;flex:none;}
   .upcoming-row .ur-del{background:none;border:none;color:var(--text-faint);flex:none;padding:4px;cursor:pointer;}
   .upcoming-row .ur-del .icon{width:15px;height:15px;}
 
-  /* Modal (reset confirmation) */
-  .modal-backdrop{position:fixed;inset:0;background:rgba(19,26,20,0.5);z-index:900;display:none;align-items:flex-end;justify-content:center;}
+  .status-pill{border-radius:999px;padding:7px 12px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;display:inline-flex;align-items:center;gap:5px;cursor:pointer;border:1.5px solid;white-space:nowrap;flex:none;background:none;}
+  .status-pill.is-unpaid{background:var(--accent-dim);color:var(--accent);border-color:var(--accent);}
+  .status-pill.is-paid{background:var(--success);color:#fff;border-color:var(--success);}
+  .status-pill .icon{width:12px;height:12px;}
+  .status-pill:disabled{opacity:.6;cursor:not-allowed;}
+
+  /* Toggle switch */
+  .switch{position:relative;display:inline-block;width:44px;height:24px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .switch .slider{position:absolute;cursor:pointer;inset:0;background:var(--surface-3);border:1.5px solid var(--border);border-radius:999px;}
+  .switch .slider:before{content:'';position:absolute;height:15px;width:15px;left:2.5px;top:2.5px;background:var(--surface);border-radius:50%;transition:.2s;box-shadow:var(--shadow-sm);}
+  .switch input:checked + .slider{background:var(--accent);border-color:var(--accent);}
+  .switch input:checked + .slider:before{transform:translateX(20px);background:#fff;}
+
+  .modal-backdrop{position:fixed;inset:0;background:rgba(34,30,38,0.5);z-index:900;display:none;align-items:flex-end;justify-content:center;}
   .modal-backdrop.show{display:flex;}
   body.mode-desktop .modal-backdrop{align-items:center;}
   .modal-sheet{background:var(--surface);width:100%;max-width:480px;border-radius:18px 18px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom));box-shadow:var(--shadow-lg);}
@@ -278,22 +293,17 @@
   .modal-sheet p{font-size:12.5px;color:var(--text-soft);margin-bottom:16px;line-height:1.5;}
   .modal-actions{display:flex;gap:10px;}
 
-  /* "More" sheet for mobile nav overflow */
   .more-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
   .more-item{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px 10px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;}
   .more-item .icon{width:22px;height:22px;color:var(--accent);}
   .more-item span{font-size:11.5px;font-weight:600;}
 
-  .progress-track{height:6px;background:var(--surface-2);border-radius:4px;overflow:hidden;margin-top:8px;}
-  .progress-fill{height:100%;background:var(--accent);border-radius:4px;}
-
-  /* ===== DEVICE MODES ===== */
   body.mode-mobile .app{max-width:480px;margin:0 auto;box-shadow:0 0 40px rgba(0,0,0,0.5);min-height:100vh;}
   body.mode-mobile .sidebar{display:none;}
   body.mode-mobile .mobile-nav{display:flex;}
   body.mode-mobile .content{padding-bottom:78px;}
 
-  body.mode-desktop{background:#E9E2CE;}
+  body.mode-desktop{background:#E7E2D3;}
   body.mode-desktop .app{max-width:1240px;margin:22px auto;border-radius:18px;overflow:hidden;box-shadow:var(--shadow-lg);min-height:calc(100vh - 44px);border:1px solid var(--border);}
   body.mode-desktop .sidebar{display:flex;}
   body.mode-desktop .mobile-nav{display:none;}
@@ -309,7 +319,7 @@
 
   .splash{position:fixed;inset:0;z-index:2000;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;transition:opacity .4s ease, visibility .4s ease;}
   .splash.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-  .splash-mark{width:56px;height:56px;border-radius:14px;background:linear-gradient(150deg,var(--header-2),var(--header-1));display:flex;align-items:center;justify-content:center;color:#EAE6D8;font-family:var(--font-display);font-weight:700;font-size:26px;}
+  .splash-mark{width:56px;height:56px;border-radius:14px;background:linear-gradient(150deg,var(--header-2),var(--header-1));display:flex;align-items:center;justify-content:center;color:#F0ECE3;font-family:var(--font-display);font-weight:700;font-size:26px;}
   .splash-ring{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface-2);border-top-color:var(--accent);animation:spin .8s linear infinite;}
   .splash-text{color:var(--text-faint);font-size:11.5px;letter-spacing:.4px;font-weight:500;}
   @keyframes spin{to{transform:rotate(360deg);}}
@@ -359,10 +369,10 @@
   <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12h2.6M18.9 12h2.6M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"/></symbol>
   <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 019.5 4a8.5 8.5 0 1010.5 10.5z"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4"/><path d="M5 4.5h13l-2.5 4.2L18 13H5"/></symbol>
-  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4.5A1.5 1.5 0 0110.5 3h3A1.5 1.5 0 0115 4.5V7"/><path d="M6 7l1 13a2 2 0 002 2h6a2 2 0 002-2l1-13"/><path d="M10 11v6M14 11v6"/></symbol>
   <symbol id="i-more" viewBox="0 0 24 24"><circle class="icon-fill" cx="5" cy="12" r="1.6"/><circle class="icon-fill" cx="12" cy="12" r="1.6"/><circle class="icon-fill" cx="19" cy="12" r="1.6"/></symbol>
   <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><rect x="7" y="11" width="3" height="8"/><rect x="12" y="7" width="3" height="12"/><rect x="17" y="13" width="3" height="6"/></symbol>
   <symbol id="i-arrow-repeat" viewBox="0 0 24 24"><path d="M20 11A8 8 0 006 6.3L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0014 4.7l2-2.7"/><path d="M20 20v-4h-4"/></symbol>
+  <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/></symbol>
 </svg>
 
 <div class="app" id="app">
@@ -383,7 +393,7 @@
       <button class="nav-btn" data-tab="settings"><svg class="icon"><use href="#i-gear"/></svg>Settings</button>
     </nav>
     <div class="sidebar-foot">
-      <div class="foot-label">Projected Balance</div>
+      <div class="foot-label">Balance</div>
       <div class="foot-value skel" id="sideBalance">₹0000</div>
     </div>
   </aside>
@@ -404,9 +414,9 @@
     </header>
 
     <div class="quick-stats">
-      <div class="qstat"><div class="qlabel">Balance</div><div class="qvalue skel" id="qsInHand">₹0000</div></div>
+      <div class="qstat"><div class="qlabel">Balance</div><div class="qvalue skel" id="qsBalance">₹0000</div></div>
       <div class="qstat accent"><div class="qlabel">Income</div><div class="qvalue skel" id="qsIncome">₹0000</div></div>
-      <div class="qstat danger"><div class="qlabel">Spent</div><div class="qvalue skel" id="qsOutgoing">₹0000</div></div>
+      <div class="qstat danger"><div class="qlabel">Spent</div><div class="qvalue skel" id="qsSpent">₹0000</div></div>
       <div class="qstat warn"><div class="qlabel">Upcoming</div><div class="qvalue skel" id="qsUpcoming">₹0000</div></div>
     </div>
 
@@ -416,9 +426,9 @@
       <section id="dashboard" class="view active">
         <div class="view-head"><h2><svg class="icon"><use href="#i-dashboard"/></svg>Dashboard</h2></div>
 
-        <div class="stat-grid" id="dashSummary"></div>
+        <div class="stat-grid reveal" id="dashSummary"></div>
 
-        <div class="panel panel-wide">
+        <div class="panel panel-wide reveal">
           <h3><svg class="icon"><use href="#i-flag"/></svg>Upcoming Payments</h3>
           <div id="dashUpcomingCaption" style="font-size:11px;color:var(--text-faint);margin:-6px 0 10px;">Loading…</div>
           <div id="dashUpcomingList"></div>
@@ -426,21 +436,21 @@
         </div>
 
         <div class="chart-grid">
-          <div class="panel">
+          <div class="panel reveal">
             <h3><svg class="icon"><use href="#i-down"/></svg>Expense by Category (This Month)</h3>
             <div class="chart-wrap"><canvas id="chartExpenseCat"></canvas></div>
             <div class="legend-list" id="expenseCatLegend"></div>
           </div>
-          <div class="panel panel-wide">
+          <div class="panel panel-wide reveal">
             <h3><svg class="icon"><use href="#i-dashboard"/></svg>6-Month Spend Trend (Expenses + EMI)</h3>
             <div class="chart-wrap"><canvas id="chartTrend"></canvas></div>
           </div>
-          <div class="panel">
+          <div class="panel reveal">
             <h3><svg class="icon"><use href="#i-bank"/></svg>EMI Due This Month</h3>
             <div class="list-row"><span class="li-name">Pending</span><span class="li-amt" id="dashEmiPending" style="color:var(--warn);">₹0</span></div>
             <div class="list-row"><span class="li-name">Paid</span><span class="li-amt" id="dashEmiPaid" style="color:var(--success);">₹0</span></div>
           </div>
-          <div class="panel">
+          <div class="panel reveal">
             <h3><svg class="icon"><use href="#i-users"/></svg>Receivables Snapshot</h3>
             <div class="list-row"><span class="li-name">Counted toward balance</span><span class="li-amt" id="dashRecvCounted" style="color:var(--success);">₹0</span></div>
             <div class="list-row"><span class="li-name">Not counted (later)</span><span class="li-amt" id="dashRecvExcluded" style="color:var(--text-faint);">₹0</span></div>
@@ -448,10 +458,10 @@
         </div>
       </section>
 
-      <!-- ADD / UPCOMING EXPENSES (single entry point for all spending) -->
+      <!-- ADD / UPCOMING -->
       <section id="upcoming" class="view">
         <div class="view-head"><h2><svg class="icon"><use href="#i-flag"/></svg>Add / Upcoming</h2></div>
-        <div class="view-caption">Log everything here as it comes up — bills, credit card dues, one-off purchases, money you owe people. Mark items Paid as they clear. When you reset for the new month, every Paid item is logged into your expense history automatically.</div>
+        <div class="view-caption">Log everything here as it comes up — bills, credit card dues, one-off purchases, money you owe people. Mark items Paid as they clear (that logs them into your expense history right away). Reset once your cycle rolls over to archive whatever's still unpaid and start fresh.</div>
 
         <div class="subtab-toggle" id="upcomingSubTabs">
           <button class="subtab-btn active" data-upcomingtab="list">This Cycle</button>
@@ -476,7 +486,7 @@
               <div class="form-group"><label><svg class="icon"><use href="#i-card"/></svg>Payment Method</label><select id="upPaymentMethod"><option value="">-- Select --</option></select></div>
             </div>
             <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><input type="text" id="upNotes" placeholder="Optional"></div>
-            <button class="btn btn-primary" onclick="addUpcomingExpense()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add</button>
+            <button class="btn btn-primary" id="upAddBtn" onclick="addUpcomingExpense(this)"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add</button>
           </div>
 
           <div class="panel form-wide">
@@ -485,7 +495,7 @@
 
           <div id="upcomingItemsList" class="form-wide"></div>
 
-          <button class="btn btn-danger form-wide" style="margin-top:6px;" onclick="confirmResetUpcoming()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-arrow-repeat"/></svg>Reset for New Month</button>
+          <button class="btn btn-danger form-wide" id="resetBtn" style="margin-top:6px;" onclick="confirmResetUpcoming()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-arrow-repeat"/></svg>Reset for New Month</button>
         </div>
 
         <div id="upcomingHistoryPanel" class="subtab-panel">
@@ -497,7 +507,7 @@
       <!-- SALARY -->
       <section id="salary" class="view">
         <div class="view-head"><h2><svg class="icon"><use href="#i-wallet"/></svg>Salary</h2></div>
-        <div class="view-caption">Log every income credit as it lands. The dashboard sums whatever's logged this month.</div>
+        <div class="view-caption">Log every income credit as it lands. It shows up in Balance and Income right away.</div>
 
         <div class="panel form-wide">
           <div class="section-title" style="margin-top:0;"><svg class="icon" style="width:12px;height:12px;"><use href="#i-plus-sm"/></svg>Log Salary / Income</div>
@@ -507,7 +517,7 @@
           </div>
           <div class="form-group"><label><svg class="icon"><use href="#i-tag"/></svg>Source</label><input type="text" id="salSource" placeholder="e.g., Salary, Freelance, Bonus"></div>
           <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><input type="text" id="salNotes" placeholder="Optional"></div>
-          <button class="btn btn-primary" onclick="addSalaryEntry()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add Entry</button>
+          <button class="btn btn-primary" id="salAddBtn" onclick="addSalaryEntry(this)"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add Entry</button>
         </div>
 
         <div class="stat-grid form-wide" id="salarySummary"></div>
@@ -536,7 +546,7 @@
               <div class="form-group"><label><svg class="icon"><use href="#i-calendar"/></svg>Tenure (Months)</label><input type="number" id="loanTenure" required placeholder="e.g., 24"></div>
             </div>
             <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><input type="text" id="loanNotes" placeholder="Optional"></div>
-            <button class="btn btn-primary" onclick="addLoan()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Create Loan &amp; Schedule</button>
+            <button class="btn btn-primary" id="loanAddBtn" onclick="addLoan(this)"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Create Loan &amp; Schedule</button>
           </div>
 
           <div id="loanCardsList"></div>
@@ -577,7 +587,7 @@
             </div>
           </div>
           <div class="form-group"><label><svg class="icon"><use href="#i-notes"/></svg>Notes</label><input type="text" id="recvNotes" placeholder="Optional"></div>
-          <button class="btn btn-primary" onclick="addReceivable()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add Receivable</button>
+          <button class="btn btn-primary" id="recvAddBtn" onclick="addReceivable(this)"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Add Receivable</button>
         </div>
 
         <div class="panel" style="margin-bottom:14px;">
@@ -665,7 +675,7 @@
             <option value="all">All Available</option>
           </select>
         </div>
-        <div class="view-caption">Based on the transaction history your sheet returns.</div>
+        <div class="view-caption">Income vs. paid expenses (bills, EMI) for the selected period.</div>
 
         <div class="hero-grid">
           <div class="hero-tile income"><div class="hlabel"><svg class="icon" style="width:13px;height:13px;"><use href="#i-up"/></svg>Income</div><div class="hvalue" id="statsIncome">₹0</div></div>
@@ -700,10 +710,16 @@
         </div>
 
         <div class="panel form-wide">
-          <div class="section-title" style="margin-top:0;">Opening Balance</div>
-          <div class="view-caption" style="margin-top:0;">Salary is no longer set here — log each credit under the Salary tab instead.</div>
+          <div class="section-title" style="margin-top:0;">Balance</div>
           <div class="form-group"><label><svg class="icon"><use href="#i-wallet"/></svg>Opening Balance (₹)</label><input type="number" id="setOpeningBalance" step="0.01"></div>
-          <button class="btn btn-primary" onclick="saveConfig()"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save</button>
+          <div class="row" style="align-items:center;grid-template-columns:1fr auto;margin-bottom:14px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Include Salary in Balance</div>
+              <div class="view-caption" style="margin:2px 0 0;">Turn off to see Balance as just Opening Balance minus paid expenses</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="setIncludeSalary" checked><span class="slider"></span></label>
+          </div>
+          <button class="btn btn-primary" id="settingsSaveBtn" onclick="saveConfig(this)"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save</button>
         </div>
 
         <div class="panel form-wide">
@@ -716,7 +732,7 @@
           <div id="paymentMethodList"></div>
           <button class="btn btn-add" onclick="addPaymentMethod()"><svg class="icon" style="width:13px;height:13px;"><use href="#i-plus-sm"/></svg>Add</button>
 
-          <button class="btn btn-primary" onclick="saveCategories()" style="margin-top:18px;"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save Categories</button>
+          <button class="btn btn-primary" id="categoriesSaveBtn" onclick="saveCategories(this)" style="margin-top:18px;"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save Categories</button>
         </div>
       </section>
 
@@ -732,7 +748,6 @@
   </div>
 </div>
 
-<!-- MORE SHEET (mobile overflow: Salary, Loans, Receivables, Statements, Settings) -->
 <div class="modal-backdrop" id="moreBackdrop">
   <div class="modal-sheet">
     <h3>More</h3>
@@ -746,14 +761,13 @@
   </div>
 </div>
 
-<!-- RESET CONFIRMATION MODAL -->
 <div class="modal-backdrop" id="resetBackdrop">
   <div class="modal-sheet">
     <h3>Reset for New Month?</h3>
-    <p id="resetModalBody">This archives every item currently in your Upcoming Expenses list — paid and unpaid — into your history with today's date, then clears the list so you can start fresh. This can't be undone from here, but nothing is deleted; it's all saved in the sheet.</p>
+    <p id="resetModalBody">This archives whatever's still unpaid into your history with today's date, then clears the list so you can start fresh. Items you already marked Paid were logged the moment you marked them — nothing happens to those.</p>
     <div class="modal-actions">
       <button class="btn btn-secondary" onclick="closeResetModal()">Cancel</button>
-      <button class="btn btn-danger" onclick="doResetUpcoming()">Reset</button>
+      <button class="btn btn-danger" id="resetConfirmBtn" onclick="doResetUpcoming(this)">Reset</button>
     </div>
   </div>
 </div>
@@ -769,7 +783,6 @@ const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1eee4qGkRIjgJGU
 
 let categories = { expenseCategories: [], paymentMethods: [] };
 let dashboardData = null;
-let recentExpenses = [];
 let loans = [];
 let loanSchedule = null;
 let receivables = null;
@@ -780,7 +793,7 @@ let salaryEntries = null;
 let stmtError = null, schedError = null, recvError = null, upError = null, upHistError = null, salError = null;
 let charts = {};
 
-const CATEGORY_PALETTE = ['#3B4A7D','#B9791E','#2E7D52','#A83E2A','#6E5B9E','#4C7EA8','#8B5E34','#57699F','#517B6B','#7A4B6B'];
+const CATEGORY_PALETTE = ['#453B4E','#AD8235','#2E7A64','#A8422E','#6E5B9E','#4C7EA8','#8B5E34','#7A6A8A','#517B6B','#8A5A46'];
 
 const PAGE_TITLES = {
   dashboard: ['Dashboard', 'Clarity · Personal Finance'],
@@ -796,14 +809,9 @@ const PAGE_TITLES = {
 document.getElementById('recvDate').valueAsDate = new Date();
 document.getElementById('salDate').valueAsDate = new Date();
 
-if (typeof pdfjsLib !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-}
+if (typeof pdfjsLib !== 'undefined') pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-function formatINR(num){
-  const n = Number(num) || 0;
-  return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
-}
+function formatINR(num){ const n = Number(num) || 0; return n.toLocaleString('en-IN', { maximumFractionDigits: 0 }); }
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
 
 function showToast(message, type) {
@@ -814,16 +822,22 @@ function showToast(message, type) {
   setTimeout(() => toast.classList.remove('show'), 3200);
 }
 
+// Disable-on-click helper: swaps button content to a spinner while the
+// promise-returning fn runs, then restores it (success or failure).
+function withLoading(btn, label, fn){
+  if (!btn) return fn();
+  const original = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="btn-spinner"></span> ${label}`;
+  return fn().finally(() => { btn.disabled = false; btn.innerHTML = original; });
+}
+
 // =========================================================
 // NAV
 // =========================================================
-document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
-});
+document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab'))));
 document.getElementById('moreNavBtn').addEventListener('click', () => document.getElementById('moreBackdrop').classList.add('show'));
-document.querySelectorAll('.more-item').forEach(item => {
-  item.addEventListener('click', () => { switchTab(item.getAttribute('data-tab')); closeMoreSheet(); });
-});
+document.querySelectorAll('.more-item').forEach(item => item.addEventListener('click', () => { switchTab(item.getAttribute('data-tab')); closeMoreSheet(); }));
 function closeMoreSheet(){ document.getElementById('moreBackdrop').classList.remove('show'); }
 
 function switchTab(tabName){
@@ -833,10 +847,7 @@ function switchTab(tabName){
   document.querySelectorAll(`.nav-btn[data-tab="${tabName}"]`).forEach(b => b.classList.add('active'));
 
   const titles = PAGE_TITLES[tabName];
-  if (titles){
-    document.getElementById('pageTitle').textContent = titles[0];
-    document.getElementById('pageSub').textContent = titles[1];
-  }
+  if (titles){ document.getElementById('pageTitle').textContent = titles[0]; document.getElementById('pageSub').textContent = titles[1]; }
 
   if (tabName === 'dashboard') loadDashboard();
   else if (tabName === 'upcoming') loadUpcomingExpenses();
@@ -890,9 +901,7 @@ if (typeof ResizeObserver !== 'undefined'){
   const ro = new ResizeObserver(() => resizeAllCharts());
   window.addEventListener('load', () => document.querySelectorAll('.chart-wrap').forEach(w => ro.observe(w)));
 }
-document.querySelectorAll('#deviceToggle button').forEach(btn => {
-  btn.addEventListener('click', () => { deviceOverride = btn.getAttribute('data-mode'); localStorage.setItem('clarity_device_view', deviceOverride); applyDeviceMode(); });
-});
+document.querySelectorAll('#deviceToggle button').forEach(btn => btn.addEventListener('click', () => { deviceOverride = btn.getAttribute('data-mode'); localStorage.setItem('clarity_device_view', deviceOverride); applyDeviceMode(); }));
 window.addEventListener('resize', () => { if (!deviceOverride) applyDeviceMode(); });
 applyDeviceMode();
 
@@ -906,8 +915,8 @@ function applyTheme(){
   const iconUse = document.querySelector('#themeToggleIcon use');
   if (iconUse) iconUse.setAttribute('href', currentTheme === 'dark' ? '#i-sun' : '#i-moon');
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', cssVar('--bg') || '#F4EFE1');
-  if (dashboardData){ loadExpenseCategoryChart(); loadTrendChart(); }
+  if (metaTheme) metaTheme.setAttribute('content', cssVar('--bg') || '#F2EFE8');
+  if (dashboardData) renderDashboard(dashboardData);
   if (document.getElementById('stats').classList.contains('active')) renderStats();
 }
 function setTheme(t){ currentTheme = t === 'dark' ? 'dark' : 'light'; localStorage.setItem('clarity_theme', currentTheme); applyTheme(); }
@@ -916,18 +925,32 @@ document.querySelectorAll('#themeToggleGroup button[data-theme]').forEach(btn =>
 applyTheme();
 
 // =========================================================
+// SCROLL REVEAL (dashboard only)
+// =========================================================
+function initScrollReveal(){
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('#dashboard .reveal').forEach(el => el.classList.add('revealed'));
+    return;
+  }
+  if (typeof IntersectionObserver === 'undefined') {
+    document.querySelectorAll('#dashboard .reveal').forEach(el => el.classList.add('revealed'));
+    return;
+  }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting){ entry.target.classList.add('revealed'); obs.unobserve(entry.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('#dashboard .reveal').forEach(el => obs.observe(el));
+}
+
+// =========================================================
 // INITIAL LOAD
 // =========================================================
 window.addEventListener('load', () => {
-  if (DEPLOYMENT_URL.indexOf('PASTE_YOUR') === 0){
-    hideSplash();
-    showToast('Set DEPLOYMENT_URL in the script before using Clarity', 'error');
-    return;
-  }
+  if (DEPLOYMENT_URL.indexOf('PASTE_YOUR') === 0){ hideSplash(); showToast('Set DEPLOYMENT_URL in the script before using Clarity', 'error'); return; }
   const catP = loadCategories();
   const dashP = loadDashboard();
-  Promise.allSettled([catP, dashP]).then(hideSplash);
-  setTimeout(hideSplash, 8000);
+  Promise.allSettled([catP, dashP]).then(() => { hideSplash(); initScrollReveal(); });
+  setTimeout(() => { hideSplash(); initScrollReveal(); }, 8000);
 });
 function hideSplash(){ const el = document.getElementById('splash'); if (el) el.classList.add('hidden'); }
 
@@ -935,8 +958,7 @@ function hideSplash(){ const el = document.getElementById('splash'); if (el) el.
 // CATEGORIES
 // =========================================================
 function loadCategories(){
-  const params = new URLSearchParams({ action: 'getCategories' });
-  return fetch(DEPLOYMENT_URL + '?' + params).then(r => r.json()).then(data => {
+  return fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getCategories' })).then(r => r.json()).then(data => {
     if (data.success){ categories = data; populateDropdowns(); renderCategoryLists(); }
   }).catch(e => showToast('Connection error', 'error'));
 }
@@ -955,36 +977,39 @@ function addExpenseCategory(){ categories.expenseCategories.push('New'); renderC
 function addPaymentMethod(){ categories.paymentMethods.push('New'); renderCategoryLists(); }
 function removeExpenseCategory(idx){ categories.expenseCategories.splice(idx,1); renderCategoryLists(); }
 function removePaymentMethod(idx){ categories.paymentMethods.splice(idx,1); renderCategoryLists(); }
-function saveCategories(){
+function saveCategories(btn){
   const data = {
     action: 'updateCategories',
     expenseCategories: Array.from(document.querySelectorAll('#expCategoryList input')).map(el => el.value),
     paymentMethods: Array.from(document.querySelectorAll('#paymentMethodList input')).map(el => el.value)
   };
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
+  withLoading(btn, 'Saving...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
     if (result.success){ showToast('Categories saved', 'success'); loadCategories(); }
     else showToast('Error: ' + result.error, 'error');
-  }).catch(e => showToast('Error: ' + e.message, 'error'));
+  }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 
 // =========================================================
-// SETTINGS (Opening Balance only)
+// SETTINGS
 // =========================================================
 function loadSettingsForm(){
-  if (dashboardData) document.getElementById('setOpeningBalance').value = dashboardData.openingBalance || 0;
+  if (dashboardData){
+    document.getElementById('setOpeningBalance').value = dashboardData.openingBalance || 0;
+    document.getElementById('setIncludeSalary').checked = dashboardData.includeSalaryInBalance !== false;
+  }
 }
-function saveConfig(){
-  const data = { action: 'updateConfig', openingBalance: document.getElementById('setOpeningBalance').value };
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
-    if (result.success){ showToast('Settings saved', 'success'); dashboardData = null; loadDashboard(); }
+function saveConfig(btn){
+  const data = { action: 'updateConfig', openingBalance: document.getElementById('setOpeningBalance').value, includeSalaryInBalance: document.getElementById('setIncludeSalary').checked };
+  withLoading(btn, 'Saving...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
+    if (result.success){ showToast('Settings saved', 'success'); loadDashboard(); }
     else showToast('Error: ' + result.error, 'error');
-  }).catch(e => showToast('Error: ' + e.message, 'error'));
+  }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 
 // =========================================================
-// UPCOMING EXPENSES
+// UPCOMING / ADD EXPENSES
 // =========================================================
-function addUpcomingExpense(){
+function addUpcomingExpense(btn){
   const data = {
     action: 'addUpcomingExpense',
     description: document.getElementById('upDescription').value,
@@ -996,19 +1021,19 @@ function addUpcomingExpense(){
     notes: document.getElementById('upNotes').value
   };
   if (!data.description || !data.amount){ showToast('Please fill Description and Amount', 'error'); return; }
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
+  withLoading(btn, 'Adding...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
     if (result.success){
       showToast('Added', 'success');
-      document.getElementById('upDescription').value = ''; document.getElementById('upAmount').value = '';
-      document.getElementById('upDueDate').value = ''; document.getElementById('upCategory').value = '';
-      document.getElementById('upPaymentMethod').value = ''; document.getElementById('upNotes').value = '';
-      upcomingItems = null; dashboardData = null; loadUpcomingExpenses();
+      document.getElementById('upDescription').value=''; document.getElementById('upAmount').value='';
+      document.getElementById('upDueDate').value=''; document.getElementById('upCategory').value='';
+      document.getElementById('upPaymentMethod').value=''; document.getElementById('upNotes').value='';
+      upcomingItems = null; loadUpcomingExpenses(); loadDashboard();
     } else showToast('Error: ' + result.error, 'error');
-  }).catch(e => showToast('Error: ' + e.message, 'error'));
+  }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 function loadUpcomingExpenses(){
   if (upcomingItems !== null){ renderUpcomingExpenses(); return; }
-  document.getElementById('upcomingItemsList').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Loading upcoming expenses…</span></div>`;
+  document.getElementById('upcomingItemsList').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Loading…</span></div>`;
   upError = null;
   fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getUpcomingExpenses' })).then(r => r.json()).then(data => {
     if (data.success && Array.isArray(data.items)) upcomingItems = data.items;
@@ -1031,9 +1056,8 @@ function renderUpcomingExpenses(){
   }
   el.innerHTML = list.map(x => `
     <div class="upcoming-row ${x.status === 'Paid' ? 'is-paid' : ''}">
-      <button class="ur-check ${x.status === 'Paid' ? 'checked' : ''}" onclick="toggleUpcomingStatus(${x.row}, '${x.status === 'Paid' ? 'Unpaid' : 'Paid'}')"><svg class="icon"><use href="#i-check"/></svg></button>
       <div class="ur-body">
-        <div class="ur-title ${x.status === 'Paid' ? 'is-paid' : ''}">${x.description}</div>
+        <div class="ur-title">${x.description}</div>
         <div class="ur-meta">
           <span class="badge ${x.type === 'Person' ? 'neutral' : 'pending'}">${x.type || 'Purchase'}</span>
           ${x.category ? `<span>${x.category}</span>` : ''}
@@ -1041,46 +1065,47 @@ function renderUpcomingExpenses(){
           ${x.dueDate ? `<span>Due ${x.dueDate}</span>` : ''}
         </div>
       </div>
-      <div class="ur-amt" style="color:${x.status === 'Paid' ? 'var(--success)' : 'var(--text)'};">₹${formatINR(x.amount)}</div>
+      <div class="ur-amt">₹${formatINR(x.amount)}</div>
+      <button class="status-pill ${x.status === 'Paid' ? 'is-paid' : 'is-unpaid'}" onclick="toggleUpcomingStatus(this, ${x.row}, '${x.status === 'Paid' ? 'Unpaid' : 'Paid'}')">
+        <svg class="icon"><use href="#${x.status === 'Paid' ? 'i-check' : 'i-circle'}"/></svg>${x.status === 'Paid' ? 'Paid' : 'Mark Paid'}
+      </button>
       <button class="ur-del" onclick="deleteUpcoming(${x.row})"><svg class="icon"><use href="#i-close"/></svg></button>
     </div>`).join('');
 }
-function toggleUpcomingStatus(row, newStatus){
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUpcomingExpenseStatus', row, status: newStatus }) })
+function toggleUpcomingStatus(btn, row, newStatus){
+  withLoading(btn, '...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateUpcomingExpenseStatus', row, status: newStatus }) })
     .then(r => r.json()).then(result => {
       if (result.success){
         const item = (upcomingItems || []).find(x => x.row === row);
         if (item) item.status = newStatus;
-        renderUpcomingExpenses(); dashboardData = null;
-        showToast(newStatus === 'Paid' ? 'Marked paid' : 'Marked unpaid', 'success');
+        renderUpcomingExpenses(); loadDashboard();
+        showToast(newStatus === 'Paid' ? 'Marked paid — logged to expense history' : 'Marked unpaid', 'success');
       } else showToast('Error: ' + result.error, 'error');
-    }).catch(e => showToast('Error: ' + e.message, 'error'));
+    }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 function deleteUpcoming(row){
   fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUpcomingExpense', row }) })
     .then(r => r.json()).then(result => {
-      if (result.success){ upcomingItems = null; dashboardData = null; loadUpcomingExpenses(); showToast('Removed', 'success'); }
+      if (result.success){ upcomingItems = null; loadUpcomingExpenses(); loadDashboard(); showToast('Removed', 'success'); }
       else showToast('Error: ' + result.error, 'error');
     }).catch(e => showToast('Error: ' + e.message, 'error'));
 }
 function confirmResetUpcoming(){
-  const count = (upcomingItems || []).length;
-  if (count === 0){ showToast('Nothing to reset — the list is already empty', 'error'); return; }
+  const list = upcomingItems || [];
+  if (list.length === 0){ showToast('Nothing to reset — the list is already empty', 'error'); return; }
+  const unpaidCount = list.filter(x => x.status !== 'Paid').length;
   document.getElementById('resetModalBody').textContent =
-    `This archives all ${count} item(s) currently in your Upcoming Expenses list — paid and unpaid — into your history with today's date, then clears the list so you can start the new month fresh. Nothing is deleted; it's all saved for reference.`;
+    `This archives the ${unpaidCount} item(s) still unpaid into your history with today's date, then clears the list so you can start the new month fresh. Items already marked Paid were logged the moment you marked them, so nothing further happens to those.`;
   document.getElementById('resetBackdrop').classList.add('show');
 }
 function closeResetModal(){ document.getElementById('resetBackdrop').classList.remove('show'); }
-function doResetUpcoming(){
-  closeResetModal();
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'resetUpcomingExpenses' }) })
+function doResetUpcoming(btn){
+  withLoading(btn, 'Resetting...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'resetUpcomingExpenses' }) })
     .then(r => r.json()).then(result => {
-      if (result.success){
-        showToast(result.message || 'Reset complete', 'success');
-        upcomingItems = null; upcomingHistory = null; dashboardData = null;
-        loadUpcomingExpenses();
-      } else showToast('Error: ' + result.error, 'error');
-    }).catch(e => showToast('Error: ' + e.message, 'error'));
+      closeResetModal();
+      if (result.success){ showToast(result.message || 'Reset complete', 'success'); upcomingItems = null; upcomingHistory = null; loadUpcomingExpenses(); loadDashboard(); }
+      else showToast('Error: ' + result.error, 'error');
+    }).catch(e => { closeResetModal(); showToast('Error: ' + e.message, 'error'); }));
 }
 function loadUpcomingHistory(){
   if (upcomingHistory !== null){ renderUpcomingHistory(); return; }
@@ -1094,13 +1119,13 @@ function loadUpcomingHistory(){
 }
 function renderUpcomingHistory(){
   const list = (upcomingHistory || []).slice().reverse();
-  document.getElementById('upHistoryLoadedInfo').textContent = upHistError ? `Couldn't load history: ${upHistError}` : `${list.length} archived item(s) across past cycles.`;
+  document.getElementById('upHistoryLoadedInfo').textContent = upHistError ? `Couldn't load history: ${upHistError}` : `${list.length} logged item(s), most recent first.`;
   const el = document.getElementById('upcomingHistoryList');
-  if (list.length === 0){ el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-flag"/></svg><p>No archived cycles yet — reset your Upcoming list once a month to build history here.</p></div>`; return; }
+  if (list.length === 0){ el.innerHTML = `<div class="empty-state"><svg class="icon"><use href="#i-flag"/></svg><p>Nothing logged yet — mark items Paid, or reset a cycle, to build history here.</p></div>`; return; }
   el.innerHTML = list.map(x => `
     <div class="card ${x.status === 'Paid' ? 'pos' : 'neg'}">
       <div class="card-header"><div class="card-title">${x.description}</div><div class="card-amount ${x.status === 'Paid' ? 'pos' : 'neg'}">₹${formatINR(x.amount)}</div></div>
-      <div class="card-meta"><span>Archived ${x.cycleDate}</span><span class="badge ${x.status === 'Paid' ? 'paid' : 'pending'}">${x.status}</span><span class="badge neutral">${x.type || 'Purchase'}</span></div>
+      <div class="card-meta"><span>${x.cycleDate}</span><span class="badge ${x.status === 'Paid' ? 'paid' : 'pending'}">${x.status}</span><span class="badge neutral">${x.type || 'Purchase'}</span>${x.category ? `<span>${x.category}</span>` : ''}</div>
       ${x.notes ? `<div class="card-footer"><span class="desc">${x.notes}</span></div>` : ''}
     </div>`).join('');
 }
@@ -1108,20 +1133,17 @@ function renderUpcomingHistory(){
 // =========================================================
 // SALARY
 // =========================================================
-function addSalaryEntry(){
-  const data = {
-    action: 'addSalary', date: document.getElementById('salDate').value, amount: document.getElementById('salAmount').value,
-    source: document.getElementById('salSource').value, notes: document.getElementById('salNotes').value
-  };
+function addSalaryEntry(btn){
+  const data = { action: 'addSalary', date: document.getElementById('salDate').value, amount: document.getElementById('salAmount').value, source: document.getElementById('salSource').value, notes: document.getElementById('salNotes').value };
   if (!data.date || !data.amount){ showToast('Please fill Date and Amount', 'error'); return; }
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
+  withLoading(btn, 'Adding...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
     if (result.success){
       showToast('Salary entry added', 'success');
       document.getElementById('salDate').valueAsDate = new Date();
-      document.getElementById('salAmount').value = ''; document.getElementById('salSource').value = ''; document.getElementById('salNotes').value = '';
-      salaryEntries = null; dashboardData = null; loadSalary();
+      document.getElementById('salAmount').value=''; document.getElementById('salSource').value=''; document.getElementById('salNotes').value='';
+      salaryEntries = null; loadSalary(); loadDashboard();
     } else showToast('Error: ' + result.error, 'error');
-  }).catch(e => showToast('Error: ' + e.message, 'error'));
+  }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 function loadSalary(){
   if (salaryEntries !== null){ renderSalary(); return; }
@@ -1153,28 +1175,31 @@ function renderSalary(){
 }
 
 // =========================================================
-// DASHBOARD
+// DASHBOARD — one call returns everything, including chart data
 // =========================================================
 function loadDashboard(){
-  const params = new URLSearchParams({ action: 'getDashboard' });
-  return fetch(DEPLOYMENT_URL + '?' + params).then(r => r.json()).then(data => {
-    if (data.success){ dashboardData = data; renderQuickStats(data); renderDashboard(data); }
+  return fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getDashboard' })).then(r => r.json()).then(data => {
+    if (data.success){
+      dashboardData = data;
+      renderQuickStats(data);
+      if (document.getElementById('dashboard').classList.contains('active')) renderDashboard(data);
+    }
   }).catch(e => console.error(e));
 }
 function renderQuickStats(d){
-  document.getElementById('qsInHand').textContent = '₹' + formatINR(d.totalInHand);
+  document.getElementById('qsBalance').textContent = '₹' + formatINR(d.balance);
   document.getElementById('qsIncome').textContent = '₹' + formatINR(d.salaryThisMonth);
-  document.getElementById('qsOutgoing').textContent = '₹' + formatINR(d.totalOutgoing);
+  document.getElementById('qsSpent').textContent = '₹' + formatINR(d.spent);
   document.getElementById('qsUpcoming').textContent = '₹' + formatINR(d.upcomingUnpaid);
-  document.getElementById('sideBalance').textContent = '₹' + formatINR(d.projectedBalance);
+  document.getElementById('sideBalance').textContent = '₹' + formatINR(d.balance);
   document.querySelectorAll('.qvalue, #sideBalance').forEach(el => el.classList.remove('skel'));
 }
 function renderDashboard(d){
   document.getElementById('dashSummary').innerHTML = `
     <div class="stat-card"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-wallet"/></svg>Salary This Month</div><div class="svalue">₹${formatINR(d.salaryThisMonth)}</div></div>
-    <div class="stat-card danger"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-down"/></svg>Expenses</div><div class="svalue">₹${formatINR(d.thisMonthExpenses)}</div></div>
+    <div class="stat-card danger"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-down"/></svg>Paid Expenses</div><div class="svalue">₹${formatINR(d.thisMonthExpenses)}</div></div>
     <div class="stat-card warn"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-bank"/></svg>EMI Due</div><div class="svalue">₹${formatINR(d.thisMonthEMI)}</div></div>
-    <div class="stat-card accent"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-up"/></svg>Incl. Receivables</div><div class="svalue">₹${formatINR(d.projectedBalanceWithReceivables)}</div></div>
+    <div class="stat-card accent"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-up"/></svg>Projected (after dues)</div><div class="svalue">₹${formatINR(d.projectedBalance)}</div></div>
   `;
   document.getElementById('dashEmiPending').textContent = '₹' + formatINR(d.thisMonthEMIPending);
   document.getElementById('dashEmiPaid').textContent = '₹' + formatINR(d.thisMonthEMIPaid);
@@ -1185,7 +1210,7 @@ function renderDashboard(d){
   const listEl = document.getElementById('dashUpcomingList');
   const list = (d.upcomingList || []);
   if (list.length === 0){
-    captionEl.textContent = 'Nothing added for this cycle — go to Upcoming to add bills, credit card dues, or people you owe.';
+    captionEl.textContent = 'Nothing added for this cycle — go to Add / Upcoming to log bills, purchases, or people you owe.';
     listEl.innerHTML = '';
   } else {
     const unpaidList = list.filter(x => x.status !== 'Paid');
@@ -1193,42 +1218,30 @@ function renderDashboard(d){
     const shown = list.slice(0, 6);
     listEl.innerHTML = shown.map(x => `
       <div class="upcoming-row ${x.status === 'Paid' ? 'is-paid' : ''}">
-        <button class="ur-check ${x.status === 'Paid' ? 'checked' : ''}" onclick="toggleUpcomingStatus(${x.row}, '${x.status === 'Paid' ? 'Unpaid' : 'Paid'}')"><svg class="icon"><use href="#i-check"/></svg></button>
         <div class="ur-body">
-          <div class="ur-title ${x.status === 'Paid' ? 'is-paid' : ''}">${x.description}</div>
+          <div class="ur-title">${x.description}</div>
           <div class="ur-meta"><span class="badge ${x.type === 'Person' ? 'neutral' : 'pending'}">${x.type || 'Purchase'}</span>${x.dueDate ? `<span>Due ${x.dueDate}</span>` : ''}</div>
         </div>
         <div class="ur-amt">₹${formatINR(x.amount)}</div>
-      </div>`).join('') + (list.length > shown.length ? `<div style="font-size:11px;color:var(--text-faint);margin-top:4px;">+${list.length - shown.length} more — see Upcoming tab</div>` : '');
-    upcomingItems = list; // keep in sync so the toggle above works without a refetch
+        <button class="status-pill ${x.status === 'Paid' ? 'is-paid' : 'is-unpaid'}" onclick="toggleUpcomingStatus(this, ${x.row}, '${x.status === 'Paid' ? 'Unpaid' : 'Paid'}')">
+          <svg class="icon"><use href="#${x.status === 'Paid' ? 'i-check' : 'i-circle'}"/></svg>${x.status === 'Paid' ? 'Paid' : 'Mark Paid'}
+        </button>
+      </div>`).join('') + (list.length > shown.length ? `<div style="font-size:11px;color:var(--text-faint);margin-top:4px;">+${list.length - shown.length} more — see Add / Upcoming tab</div>` : '');
+    upcomingItems = list;
   }
 
-  loadExpenseCategoryChart();
-  loadTrendChart();
+  renderDonut('chartExpenseCat', 'expenseCatLegend', d.categoryBreakdown || {}, d.thisMonthExpenses);
+  renderTrendChart(d.trend || []);
 }
 function colorForIndex(i){ return CATEGORY_PALETTE[i % CATEGORY_PALETTE.length]; }
 
-function loadExpenseCategoryChart(){
-  fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getExpenses' })).then(r => r.json()).then(data => {
-    const now = new Date();
-    const byCat = {}; let total = 0;
-    (data.expenses || []).forEach(ex => {
-      const d = new Date(ex.rawDate || ex.date);
-      if (isNaN(d.getTime())) return;
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()){
-        const amt = parseFloat(ex.amount) || 0; byCat[ex.category] = (byCat[ex.category] || 0) + amt; total += amt;
-      }
-    });
-    renderDonut('chartExpenseCat', 'expenseCatLegend', byCat, total);
-  }).catch(e => {});
-}
 function renderDonut(canvasId, legendId, dataObj, total){
   const entries = Object.entries(dataObj).sort((a,b) => b[1]-a[1]);
   const canvasEl = document.getElementById(canvasId);
   const legendEl = document.getElementById(legendId);
   if (entries.length === 0){
     canvasEl.style.display = 'none';
-    legendEl.innerHTML = '<div style="font-size:11px;color:var(--text-faint);">No expenses logged this month yet.</div>';
+    legendEl.innerHTML = '<div style="font-size:11px;color:var(--text-faint);">No paid expenses in this period yet.</div>';
     if (charts[canvasId]){ charts[canvasId].destroy(); charts[canvasId] = null; }
     return;
   }
@@ -1251,110 +1264,58 @@ function renderDonut(canvasId, legendId, dataObj, total){
     return `<div class="legend-row"><span class="legend-dot" style="background:${colorForIndex(i)}"></span><span class="legend-name">${name}</span><span class="legend-bar-track"><span class="legend-bar-fill" style="width:${pct}%;background:${colorForIndex(i)}"></span></span><span class="legend-amt">₹${formatINR(val)}</span></div>`;
   }).join('');
 }
-
-function loadTrendChart(){
-  Promise.all([
-    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getExpenses' })).then(r => r.json()),
-    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getLoanSchedule' })).then(r => r.json())
-  ]).then(([expData, schedData]) => {
-    const months = []; const now = new Date();
-    for (let i = 5; i >= 0; i--){
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      months.push({ key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`, label: d.toLocaleString('en-US', { month: 'short' }), expense: 0, emi: 0 });
+function renderTrendChart(trend){
+  const canvasEl = document.getElementById('chartTrend');
+  if (typeof Chart === 'undefined'){ canvasEl.parentElement.innerHTML = '<div style="font-size:11px;color:var(--text-faint);padding:18px 0;text-align:center;">Chart library unavailable.</div>'; return; }
+  if (charts['chartTrend']) charts['chartTrend'].destroy();
+  const tickColor = cssVar('--text-soft') || '#6C6459';
+  const gridColor = cssVar('--border') || '#E2DCCC';
+  charts['chartTrend'] = new Chart(canvasEl.getContext('2d'), {
+    type: 'bar',
+    data: { labels: trend.map(m => m.label), datasets: [
+      { label: 'Expenses', data: trend.map(m => m.expense), backgroundColor: cssVar('--danger') || '#A8422E', borderRadius: 5 },
+      { label: 'EMI', data: trend.map(m => m.emi), backgroundColor: cssVar('--warn') || '#9C7A2E', borderRadius: 5 }
+    ]},
+    options: { maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { color: tickColor, callback: v => '₹' + formatINR(v) }, grid: { color: gridColor } }, x: { ticks: { color: tickColor }, grid: { display: false } } },
+      plugins: { legend: { position: 'bottom', labels: { color: tickColor, boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ₹${formatINR(c.parsed.y)}` } } }
     }
-    const byKey = {}; months.forEach(m => byKey[m.key] = m);
-    (expData.expenses || []).forEach(ex => {
-      const d = new Date(ex.rawDate || ex.date); if (isNaN(d.getTime())) return;
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      if (byKey[key]) byKey[key].expense += parseFloat(ex.amount) || 0;
-    });
-    (schedData.schedule || []).forEach(s => {
-      const d = new Date(s.monthDate); if (isNaN(d.getTime())) return;
-      const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      if (byKey[key]) byKey[key].emi += parseFloat(s.amount) || 0;
-    });
-    const canvasEl = document.getElementById('chartTrend');
-    if (typeof Chart === 'undefined'){ canvasEl.parentElement.innerHTML = '<div style="font-size:11px;color:var(--text-faint);padding:18px 0;text-align:center;">Chart library unavailable.</div>'; return; }
-    if (charts['chartTrend']) charts['chartTrend'].destroy();
-    const tickColor = cssVar('--text-soft') || '#6E6656';
-    const gridColor = cssVar('--border') || '#E4D9BC';
-    charts['chartTrend'] = new Chart(canvasEl.getContext('2d'), {
-      type: 'bar',
-      data: { labels: months.map(m => m.label), datasets: [
-        { label: 'Expenses', data: months.map(m => m.expense), backgroundColor: cssVar('--danger') || '#B0442E', borderRadius: 5 },
-        { label: 'EMI', data: months.map(m => m.emi), backgroundColor: cssVar('--warn') || '#C08A2E', borderRadius: 5 }
-      ]},
-      options: { maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true, ticks: { color: tickColor, callback: v => '₹' + formatINR(v) }, grid: { color: gridColor } }, x: { ticks: { color: tickColor }, grid: { display: false } } },
-        plugins: { legend: { position: 'bottom', labels: { color: tickColor, boxWidth: 10, font: { size: 11 } } }, tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ₹${formatINR(c.parsed.y)}` } } }
-      }
-    });
-  }).catch(e => {});
+  });
 }
 
 // =========================================================
-// STATS (Income vs Expense analytics)
+// STATS — single call
 // =========================================================
-function monthsBackFilter(period){
-  if (period === 'this') return 0;
-  if (period === 'all') return null;
-  return parseInt(period, 10);
-}
-function withinPeriod(dateStr, period){
-  if (period === 'all') return true;
-  const d = new Date(dateStr); if (isNaN(d.getTime())) return false;
-  const now = new Date();
-  if (period === 'this') return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-  const monthsBack = parseInt(period, 10);
-  const cutoff = new Date(now.getFullYear(), now.getMonth() - monthsBack + 1, 1);
-  return d >= cutoff;
-}
 function renderStats(){
   const period = document.getElementById('statsPeriod').value;
-  Promise.all([
-    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getExpenses' })).then(r => r.json()),
-    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getSalary' })).then(r => r.json()),
-    fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getLoanSchedule' })).then(r => r.json())
-  ]).then(([expData, salData, schedData]) => {
-    const expenses = (expData.expenses || []).filter(ex => withinPeriod(ex.rawDate, period));
-    const salary = (salData.entries || []).filter(s => withinPeriod(s.rawDate, period));
-    const emi = (schedData.schedule || []).filter(s => s.status === 'Paid' && withinPeriod(s.monthDate, period));
-
-    const income = salary.reduce((sum,x) => sum + (parseFloat(x.amount)||0), 0);
-    const expenseTotal = expenses.reduce((sum,x) => sum + (parseFloat(x.amount)||0), 0) + emi.reduce((sum,x) => sum + (parseFloat(x.amount)||0), 0);
-    const net = income - expenseTotal;
-    const entries = expenses.length + salary.length;
-
-    document.getElementById('statsIncome').textContent = '₹' + formatINR(income);
-    document.getElementById('statsExpense').textContent = '₹' + formatINR(expenseTotal);
-    document.getElementById('statsNet').textContent = '₹' + formatINR(net);
-    document.getElementById('statsEntries').textContent = entries;
-
-    const byCat = {};
-    expenses.forEach(ex => { byCat[ex.category] = (byCat[ex.category]||0) + (parseFloat(ex.amount)||0); });
-    if (emi.length) byCat['Loan / EMI'] = (byCat['Loan / EMI']||0) + emi.reduce((s,x)=>s+(parseFloat(x.amount)||0),0);
-    renderDonut('chartStatsCat', 'statsCatLegend', byCat, expenseTotal);
-  }).catch(e => {});
+  fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getStats', period })).then(r => r.json()).then(data => {
+    if (!data.success){ showToast('Could not load stats: ' + data.error, 'error'); return; }
+    document.getElementById('statsIncome').textContent = '₹' + formatINR(data.income);
+    document.getElementById('statsExpense').textContent = '₹' + formatINR(data.expense);
+    document.getElementById('statsNet').textContent = '₹' + formatINR(data.net);
+    document.getElementById('statsEntries').textContent = data.entries;
+    renderDonut('chartStatsCat', 'statsCatLegend', data.categoryBreakdown || {}, data.expense);
+  }).catch(e => showToast('Error loading stats: ' + e.message, 'error'));
 }
 
 // =========================================================
 // LOANS & EMI
 // =========================================================
-function addLoan(){
+function addLoan(btn){
   const data = {
     action: 'addLoan', loanName: document.getElementById('loanName').value, totalAmount: document.getElementById('loanTotal').value,
     emiAmount: document.getElementById('loanEmi').value, startMonth: document.getElementById('loanStart').value,
     tenureMonths: document.getElementById('loanTenure').value, notes: document.getElementById('loanNotes').value
   };
   if (!data.loanName || !data.emiAmount || !data.startMonth || !data.tenureMonths){ showToast('Please fill Loan Name, EMI, Start Month and Tenure', 'error'); return; }
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
+  withLoading(btn, 'Creating...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
     if (result.success){
       showToast('Loan created', 'success');
       document.getElementById('loanName').value=''; document.getElementById('loanTotal').value=''; document.getElementById('loanEmi').value='';
       document.getElementById('loanStart').value=''; document.getElementById('loanTenure').value=''; document.getElementById('loanNotes').value='';
-      loanSchedule = null; loadLoans();
+      loanSchedule = null; loadLoans(); loadDashboard();
     } else showToast('Error: ' + result.error, 'error');
-  }).catch(e => showToast('Error: ' + e.message, 'error'));
+  }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 function loadLoans(){
   fetch(DEPLOYMENT_URL + '?' + new URLSearchParams({ action: 'getLoans' })).then(r => r.json()).then(data => {
@@ -1414,35 +1375,35 @@ function renderLoanSchedule(){
     <div class="list-row">
       <div style="flex:1;"><div class="li-name">${s.loanName} — ${s.monthLabel}</div></div>
       <span class="li-amt">₹${formatINR(s.amount)}</span>
-      <button class="btn ${s.status === 'Paid' ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleScheduleStatus(${s.row}, '${s.status === 'Paid' ? 'Pending' : 'Paid'}')">${s.status === 'Paid' ? 'Paid ✓' : 'Mark Paid'}</button>
+      <button class="btn ${s.status === 'Paid' ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleScheduleStatus(this, ${s.row}, '${s.status === 'Paid' ? 'Pending' : 'Paid'}')">${s.status === 'Paid' ? 'Paid ✓' : 'Mark Paid'}</button>
     </div>`).join('');
 }
-function toggleScheduleStatus(row, newStatus){
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateLoanScheduleStatus', row, status: newStatus }) })
+function toggleScheduleStatus(btn, row, newStatus){
+  withLoading(btn, '...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateLoanScheduleStatus', row, status: newStatus }) })
     .then(r => r.json()).then(result => {
-      if (result.success){ const item = (loanSchedule || []).find(s => s.row === row); if (item) item.status = newStatus; renderLoanSchedule(); dashboardData = null; showToast('Updated', 'success'); }
+      if (result.success){ const item = (loanSchedule || []).find(s => s.row === row); if (item) item.status = newStatus; renderLoanSchedule(); loadDashboard(); showToast('Updated', 'success'); }
       else showToast('Error: ' + result.error, 'error');
-    }).catch(e => showToast('Error: ' + e.message, 'error'));
+    }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 
 // =========================================================
 // RECEIVABLES
 // =========================================================
-function addReceivable(){
+function addReceivable(btn){
   const data = {
     action: 'addReceivable', name: document.getElementById('recvName').value, reason: document.getElementById('recvReason').value,
     amount: document.getElementById('recvAmount').value, dateGiven: document.getElementById('recvDate').value,
     countsTowardBalance: document.getElementById('recvCounts').value, notes: document.getElementById('recvNotes').value
   };
   if (!data.name || !data.amount || !data.dateGiven){ showToast('Please fill Name, Amount and Date Given', 'error'); return; }
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
+  withLoading(btn, 'Adding...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify(data) }).then(r => r.json()).then(result => {
     if (result.success){
       showToast('Receivable added', 'success');
       document.getElementById('recvName').value=''; document.getElementById('recvReason').value=''; document.getElementById('recvAmount').value='';
       document.getElementById('recvDate').valueAsDate = new Date(); document.getElementById('recvCounts').value='No'; document.getElementById('recvNotes').value='';
-      receivables = null; dashboardData = null; loadReceivables();
+      receivables = null; loadReceivables(); loadDashboard();
     } else showToast('Error: ' + result.error, 'error');
-  }).catch(e => showToast('Error: ' + e.message, 'error'));
+  }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 function loadReceivables(){
   if (receivables !== null){ renderReceivables(); return; }
@@ -1483,24 +1444,24 @@ function renderReceivables(){
       <div class="card-meta"><span>${r.dateGiven}</span><span class="badge ${r.status === 'Received' ? 'paid' : 'pending'}">${r.status}</span><span class="badge neutral">${r.countsTowardBalance === 'Yes' ? 'Counted' : 'Not counted'}</span></div>
       ${r.reason ? `<div class="card-footer"><span class="desc">${r.reason}</span></div>` : ''}
       <div class="card-footer">
-        ${r.status === 'Pending' ? `<button class="btn btn-primary btn-sm" onclick="markReceived(${r.row})">Mark Received</button>` : ''}
-        <button class="btn btn-secondary btn-sm" onclick="toggleCounts(${r.row}, '${r.countsTowardBalance === 'Yes' ? 'No' : 'Yes'}')">${r.countsTowardBalance === 'Yes' ? 'Exclude from Balance' : 'Count Toward Balance'}</button>
+        ${r.status === 'Pending' ? `<button class="btn btn-primary btn-sm" onclick="markReceived(this, ${r.row})">Mark Received</button>` : ''}
+        <button class="btn btn-secondary btn-sm" onclick="toggleCounts(this, ${r.row}, '${r.countsTowardBalance === 'Yes' ? 'No' : 'Yes'}')">${r.countsTowardBalance === 'Yes' ? 'Exclude from Balance' : 'Count Toward Balance'}</button>
       </div>
     </div>`).join('');
 }
-function markReceived(row){
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReceivable', row, status: 'Received' }) })
+function markReceived(btn, row){
+  withLoading(btn, '...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReceivable', row, status: 'Received' }) })
     .then(r => r.json()).then(result => {
-      if (result.success){ const item = (receivables || []).find(r => r.row === row); if (item) item.status = 'Received'; renderReceivables(); dashboardData = null; showToast('Marked received', 'success'); }
+      if (result.success){ const item = (receivables || []).find(r => r.row === row); if (item) item.status = 'Received'; renderReceivables(); loadDashboard(); showToast('Marked received', 'success'); }
       else showToast('Error: ' + result.error, 'error');
-    }).catch(e => showToast('Error: ' + e.message, 'error'));
+    }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
-function toggleCounts(row, newVal){
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReceivable', row, countsTowardBalance: newVal }) })
+function toggleCounts(btn, row, newVal){
+  withLoading(btn, '...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateReceivable', row, countsTowardBalance: newVal }) })
     .then(r => r.json()).then(result => {
-      if (result.success){ const item = (receivables || []).find(r => r.row === row); if (item) item.countsTowardBalance = newVal; renderReceivables(); dashboardData = null; showToast('Updated', 'success'); }
+      if (result.success){ const item = (receivables || []).find(r => r.row === row); if (item) item.countsTowardBalance = newVal; renderReceivables(); loadDashboard(); showToast('Updated', 'success'); }
       else showToast('Error: ' + result.error, 'error');
-    }).catch(e => showToast('Error: ' + e.message, 'error'));
+    }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 
 // =========================================================
@@ -1537,10 +1498,7 @@ function extractStatement(){
       return Promise.all(pagePromises);
     }).then(pagesText => {
       const fullText = pagesText.join('\n');
-      if (fullText.trim().length < 40){
-        document.getElementById('stmtProgress').innerHTML = ''; btn.disabled = false;
-        showToast('Could not read text from this PDF — it may be a scanned image', 'error'); return;
-      }
+      if (fullText.trim().length < 40){ document.getElementById('stmtProgress').innerHTML = ''; btn.disabled = false; showToast('Could not read text from this PDF — it may be a scanned image', 'error'); return; }
       document.getElementById('stmtProgress').innerHTML = `<div class="section-spinner"><div class="ring"></div><span>Parsing transactions with AI…</span></div>`;
       const source = document.getElementById('stmtSource').value;
       fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'parseStatementText', text: fullText, source }) })
@@ -1573,14 +1531,14 @@ function renderReviewTable(transactions, source){
       <div class="section-title" style="margin-top:0;">Review ${transactions.length} Extracted Transaction(s)</div>
       <div class="view-caption">Uncheck any row that shouldn't be saved, fix anything the AI misread, then save. New categories the AI introduced were already added to your list.</div>
       <div id="reviewRowsWrap">${html}</div>
-      <button class="btn btn-primary" onclick="saveReviewedTransactions('${source}')"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save Selected</button>
+      <button class="btn btn-primary" id="reviewSaveBtn" onclick="saveReviewedTransactions(this, '${source}')"><svg class="icon" style="width:14px;height:14px;"><use href="#i-check"/></svg>Save Selected</button>
     </div>`;
   transactions.forEach((tx, idx) => {
     const sel = document.querySelectorAll('#reviewRowsWrap .review-row')[idx].querySelector('.rr-category');
     if (tx.category) sel.value = tx.category;
   });
 }
-function saveReviewedTransactions(source){
+function saveReviewedTransactions(btn, source){
   const rows = document.querySelectorAll('#reviewRowsWrap .review-row');
   const transactions = [];
   rows.forEach(row => {
@@ -1591,14 +1549,14 @@ function saveReviewedTransactions(source){
     });
   });
   if (transactions.length === 0){ showToast('No rows selected', 'error'); return; }
-  fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveStatementTransactions', transactions, source }) })
+  withLoading(btn, 'Saving...', () => fetch(DEPLOYMENT_URL, { method: 'POST', body: JSON.stringify({ action: 'saveStatementTransactions', transactions, source }) })
     .then(r => r.json()).then(result => {
       if (result.success){
         showToast(transactions.length + ' transactions saved', 'success');
         document.getElementById('stmtReview').innerHTML = ''; clearChosenFile(); document.getElementById('stmtPassword').value = '';
         statementTransactions = null; loadCategories();
       } else showToast('Error: ' + result.error, 'error');
-    }).catch(e => showToast('Error: ' + e.message, 'error'));
+    }).catch(e => showToast('Error: ' + e.message, 'error')));
 }
 
 // =========================================================
