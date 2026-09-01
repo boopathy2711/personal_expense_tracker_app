@@ -1199,7 +1199,7 @@ function renderDashboard(d){
     <div class="stat-card"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-wallet"/></svg>Salary This Month</div><div class="svalue">₹${formatINR(d.salaryThisMonth)}</div></div>
     <div class="stat-card danger"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-down"/></svg>Paid Expenses</div><div class="svalue">₹${formatINR(d.thisMonthExpenses)}</div></div>
     <div class="stat-card warn"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-bank"/></svg>EMI Due</div><div class="svalue">₹${formatINR(d.thisMonthEMI)}</div></div>
-    <div class="stat-card accent"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-up"/></svg>Projected (after dues)</div><div class="svalue">₹${formatINR(d.projectedBalance)}</div></div>
+    <div class="stat-card accent"><div class="slabel"><svg class="icon" style="width:12px;height:12px;"><use href="#i-up"/></svg>Projected Balance after pending payments</div><div class="svalue">₹${formatINR(d.projectedBalance)}</div></div>
   `;
   document.getElementById('dashEmiPending').textContent = '₹' + formatINR(d.thisMonthEMIPending);
   document.getElementById('dashEmiPaid').textContent = '₹' + formatINR(d.thisMonthEMIPaid);
