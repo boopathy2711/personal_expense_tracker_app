@@ -1,0 +1,1275 @@
+/**
+ * CLARITY — Backend (Google Apps Script Web App)
+ * ------------------------------------------------
+ * Deploy: Extensions > Apps Script > paste this file > Deploy > Web App
+ *   Execute as: Me
+ *   Who has access: Anyone with the link (or "Only myself")
+ *
+ * FIRST-TIME SETUP: run setupClaritySheets() once from the Apps Script editor
+ * (select it in the function dropdown, click Run, approve permissions).
+ * Safe to re-run — it only creates what's missing and won't touch existing data.
+ *
+ * If you're upgrading from an older version that had separate "Expenses" and
+ * "UpcomingExpensesHistory" sheets: rename your old "UpcomingExpensesHistory"
+ * tab to "ExpenseHistory" (keeping its data) and add a "Payment Method" header
+ * in column I of "UpcomingExpenses" (existing rows can leave it blank), then
+ * run setupClaritySheets() to backfill number formatting. Your old separate
+ * "Expenses" sheet is no longer used and can be archived/deleted.
+ */
+
+const SHEET_NAMES = {
+  LOANS: 'Loans',
+  LOAN_SCHEDULE: 'LoanSchedule',
+  RECEIVABLES: 'Receivables',
+  STATEMENT_TX: 'StatementTransactions',
+  CATEGORIES: 'Categories',
+  CONFIG: 'Config',
+  SALARY: 'Salary',
+  UPCOMING: 'UpcomingExpenses',
+  HISTORY: 'ExpenseHistory'
+};
+
+const SEED_EXPENSE_CATEGORIES = [
+  'Rent', 'Groceries', 'Credit Card Bill', 'EMI / Loan', 'Electricity',
+  'Internet & Mobile', 'Transport & Fuel', 'Dining & Takeout', 'Subscriptions',
+  'Medical & Health', 'Insurance', 'Borrowed / Lent', 'Shopping',
+  'Entertainment', 'Travel', 'Education', 'Personal Care',
+  'Gifts & Donations', 'Household', 'Other'
+];
+const SEED_PAYMENT_METHODS = ['Cash', 'Debit Card', 'Credit Card', 'UPI', 'Net Banking', 'Bank Transfer'];
+
+const SHEET_HEADERS = {
+  Loans: ['Loan Name', 'Total Amount', 'EMI Amount', 'Start Month', 'Tenure Months', 'Notes', 'Status'],
+  LoanSchedule: ['Loan Name', 'Month Label', 'Month Date', 'Amount', 'Status'],
+  Receivables: ['Name', 'Reason', 'Amount', 'Date Given', 'Counts Toward Balance', 'Status', 'Date Received', 'Notes'],
+  StatementTransactions: ['Date', 'Description', 'Amount', 'Type', 'Source', 'Category', 'Import Batch', 'Notes'],
+  Categories: ['Expense Categories', 'Payment Methods'],
+  Config: ['Key', 'Value'],
+  Salary: ['Date', 'Amount', 'Source', 'Notes'],
+  UpcomingExpenses: ['Description', 'Category', 'Amount', 'Due Date', 'Type', 'Status', 'Notes', 'Payment Method', 'History Row'],
+  ExpenseHistory: ['Date', 'Description', 'Category', 'Amount', 'Due Date', 'Type', 'Status', 'Notes', 'Payment Method']
+};
+
+// Pre-formatting whole columns once (at setup) means we never need to call
+// setNumberFormat() on every write later — a real speed win at write time.
+const NUMBER_FORMATS = {
+  Loans: [{ col: 2, fmt: '₹#,##0.00' }, { col: 3, fmt: '₹#,##0.00' }, { col: 4, fmt: 'dd-mmm-yyyy' }],
+  LoanSchedule: [{ col: 3, fmt: 'dd-mmm-yyyy' }, { col: 4, fmt: '₹#,##0.00' }],
+  Receivables: [{ col: 3, fmt: '₹#,##0.00' }, { col: 4, fmt: 'dd-mmm-yyyy' }, { col: 7, fmt: 'dd-mmm-yyyy' }],
+  StatementTransactions: [{ col: 1, fmt: 'dd-mmm-yyyy' }, { col: 3, fmt: '₹#,##0.00' }],
+  Salary: [{ col: 1, fmt: 'dd-mmm-yyyy' }, { col: 2, fmt: '₹#,##0.00' }],
+  UpcomingExpenses: [{ col: 3, fmt: '₹#,##0.00' }, { col: 4, fmt: 'dd-mmm-yyyy' }],
+  ExpenseHistory: [{ col: 1, fmt: 'dd-mmm-yyyy' }, { col: 4, fmt: '₹#,##0.00' }, { col: 5, fmt: 'dd-mmm-yyyy' }]
+};
+
+const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+function setupClaritySheets() {
+  Object.keys(SHEET_HEADERS).forEach(name => {
+    let sheet = ss.getSheetByName(name);
+    if (!sheet) sheet = ss.insertSheet(name);
+    if (sheet.getRange(1, 1).getValue() === '') {
+      sheet.getRange(1, 1, 1, SHEET_HEADERS[name].length).setValues([SHEET_HEADERS[name]]);
+      sheet.getRange(1, 1, 1, SHEET_HEADERS[name].length).setFontWeight('bold');
+      sheet.setFrozenRows(1);
+    }
+    const formats = NUMBER_FORMATS[name];
+    if (formats) formats.forEach(f => sheet.getRange(2, f.col, 998, 1).setNumberFormat(f.fmt));
+  });
+  ensureSeedCategories(ss.getSheetByName(SHEET_NAMES.CATEGORIES));
+  return 'Clarity sheets are ready.';
+}
+
+// ============================================================
+// ROUTING
+// ============================================================
+function doGet(e) {
+  if (!e || !e.parameter) return jsonResponse({ success: false, error: 'doGet must be called through the Web App URL.' });
+  const action = e.parameter.action;
+  switch (action) {
+    case 'getDashboard': return getDashboard();
+    case 'getStats': return getStats(e.parameter.period);
+    case 'getLoans': return getLoans();
+    case 'getLoanSchedule': return getLoanSchedule();
+    case 'getReceivables': return getReceivables();
+    case 'getStatementTransactions': return getStatementTransactions();
+    case 'getCategories': return getCategories();
+    case 'getSalary': return getSalary();
+    case 'getUpcomingExpenses': return getUpcomingExpenses();
+    case 'getUpcomingHistory': return getUpcomingHistory();
+    default: return jsonResponse({ success: false, error: 'Invalid action' });
+  }
+}
+
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) throw new Error('No POST data received.');
+    const data = JSON.parse(e.postData.contents);
+    switch (data.action) {
+      case 'addLoan': return addLoan(data);
+      case 'updateLoanScheduleStatus': return updateLoanScheduleStatus(data);
+      case 'addReceivable': return addReceivable(data);
+      case 'updateReceivable': return updateReceivable(data);
+      case 'updateCategories': return updateCategories(data);
+      case 'updateConfig': return updateConfig(data);
+      case 'parseStatementText': return parseStatementText(data);
+      case 'saveStatementTransactions': return saveStatementTransactions(data);
+      case 'addSalary': return addSalary(data);
+      case 'addUpcomingExpense': return addUpcomingExpense(data);
+      case 'updateUpcomingExpenseStatus': return updateUpcomingExpenseStatus(data);
+      case 'deleteUpcomingExpense': return deleteUpcomingExpense(data);
+      case 'resetUpcomingExpenses': return resetUpcomingExpenses(data);
+      default: return jsonResponse({ success: false, error: 'Invalid action' });
+    }
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function jsonResponse(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function getLastDataRow(sheet, column) {
+  column = column || 1;
+  const maxRows = sheet.getMaxRows();
+  const values = sheet.getRange(1, column, maxRows, 1).getValues();
+  for (let i = values.length - 1; i >= 0; i--) {
+    if (values[i][0] !== '' && values[i][0] !== null) return i + 1;
+  }
+  return 1;
+}
+
+function getColumnData(sheet, column, startRow) {
+  const maxRow = 1000;
+  const values = sheet.getRange(column + startRow + ':' + column + maxRow).getValues();
+  const result = [];
+  for (let i = 0; i < values.length; i++) {
+    const value = values[i][0];
+    if (value !== null && value !== undefined && value.toString().trim() !== '') {
+      result.push(value.toString().trim());
+    } else if (result.length > 0) {
+      break;
+    }
+  }
+  return result;
+}
+
+function updateColumnData(sheet, column, startRow, values) {
+  sheet.getRange(column + startRow + ':' + column + 1000).clearContent();
+  const clean = (values || []).map(v => (v === null || v === undefined) ? '' : v.toString().trim()).filter(v => v !== '');
+  if (clean.length === 0) return;
+  sheet.getRange(column + startRow + ':' + column + (startRow + clean.length - 1)).setValues(clean.map(v => [v]));
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  return Utilities.formatDate(new Date(d), Session.getScriptTimeZone(), 'dd MMM yyyy');
+}
+function fmtRawDate(d) {
+  if (!d) return '';
+  return Utilities.formatDate(new Date(d), Session.getScriptTimeZone(), 'yyyy-MM-dd');
+}
+function addMonths(date, n) {
+  const d = new Date(date);
+  d.setMonth(d.getMonth() + n);
+  return d;
+}
+function monthLabel(date) {
+  return Utilities.formatDate(new Date(date), Session.getScriptTimeZone(), 'MMMM yyyy');
+}
+function isSameMonth(date, ref) {
+  const d = new Date(date);
+  return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+}
+
+// ============================================================
+// CATEGORIES (seeded master list + auto-grow)
+// ============================================================
+function ensureSeedCategories(sheet) {
+  if (!sheet) return;
+  const existingExp = getColumnData(sheet, 'A', 2);
+  const existingPay = getColumnData(sheet, 'B', 2);
+  if (existingExp.length === 0) sheet.getRange(2, 1, SEED_EXPENSE_CATEGORIES.length, 1).setValues(SEED_EXPENSE_CATEGORIES.map(c => [c]));
+  if (existingPay.length === 0) sheet.getRange(2, 2, SEED_PAYMENT_METHODS.length, 1).setValues(SEED_PAYMENT_METHODS.map(p => [p]));
+}
+
+function getCategoryLists() {
+  const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORIES);
+  if (!sheet) throw new Error('Categories sheet not found. Run setupClaritySheets() once.');
+  ensureSeedCategories(sheet);
+  return { expenseCategories: getColumnData(sheet, 'A', 2), paymentMethods: getColumnData(sheet, 'B', 2) };
+}
+
+function getCategories() {
+  try {
+    const lists = getCategoryLists();
+    return jsonResponse({ success: true, expenseCategories: lists.expenseCategories, paymentMethods: lists.paymentMethods });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function addCategoryIfNew(categoryName) {
+  if (!categoryName) return false;
+  const clean = categoryName.toString().trim();
+  if (!clean) return false;
+  const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORIES);
+  if (!sheet) return false;
+  ensureSeedCategories(sheet);
+  const existing = getColumnData(sheet, 'A', 2);
+  const exists = existing.some(c => c.toLowerCase() === clean.toLowerCase());
+  if (!exists) {
+    const row = getLastDataRow(sheet, 1) + 1;
+    sheet.getRange(row, 1).setValue(clean);
+    return true;
+  }
+  return false;
+}
+
+function updateCategories(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.CATEGORIES);
+    if (!sheet) throw new Error('Categories sheet not found.');
+    if (data.expenseCategories) updateColumnData(sheet, 'A', 2, data.expenseCategories);
+    if (data.paymentMethods) updateColumnData(sheet, 'B', 2, data.paymentMethods);
+    return jsonResponse({ success: true, message: 'Categories updated' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// CONFIG
+// ============================================================
+function readConfig() {
+  const sheet = ss.getSheetByName(SHEET_NAMES.CONFIG);
+  if (!sheet) throw new Error('Config sheet not found.');
+  const lastRow = getLastDataRow(sheet, 1);
+  const data = sheet.getRange(2, 1, Math.max(lastRow - 1, 1), 2).getValues();
+  const config = {};
+  data.forEach(row => { if (row[0]) config[row[0].toString().trim()] = row[1]; });
+  return config;
+}
+
+function updateConfig(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.CONFIG);
+    if (!sheet) throw new Error('Config sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    const keys = sheet.getRange(2, 1, Math.max(lastRow - 1, 1), 1).getValues();
+    function setKey(key, value) {
+      if (value === undefined || value === null || value === '') return;
+      for (let i = 0; i < keys.length; i++) {
+        if ((keys[i][0] || '').toString().trim() === key) { sheet.getRange(i + 2, 2).setValue(value); return; }
+      }
+      const newRow = getLastDataRow(sheet, 1) + 1;
+      sheet.getRange(newRow, 1, 1, 2).setValues([[key, value]]);
+    }
+    if (data.openingBalance !== undefined) setKey('OPENING_BALANCE', parseFloat(data.openingBalance) || 0);
+    if (data.includeSalaryInBalance !== undefined) setKey('INCLUDE_SALARY_IN_BALANCE', data.includeSalaryInBalance ? 'Yes' : 'No');
+    return jsonResponse({ success: true, message: 'Settings updated' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// SALARY LOG
+// ============================================================
+function addSalary(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.SALARY);
+    if (!sheet) throw new Error('Salary sheet not found. Run setupClaritySheets() once.');
+
+    const amount = parseFloat(data.amount);
+    if (isNaN(amount) || amount <= 0) {
+      throw new Error('Please enter a valid salary amount.');
+    }
+
+    if (!data.date) {
+      throw new Error('Salary date is required.');
+    }
+
+    // Frontend date input is expected as YYYY-MM-DD.
+    // Construct the date locally to avoid timezone shifting.
+    const dateString = data.date.toString().trim();
+    const parts = dateString.split('-');
+
+    if (parts.length !== 3) {
+      throw new Error('Invalid salary date. Expected YYYY-MM-DD.');
+    }
+
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+
+    const salaryDate = new Date(year, month - 1, day);
+
+    if (isNaN(salaryDate.getTime())) {
+      throw new Error('Invalid salary date.');
+    }
+
+    const newRow = Math.max(2, getLastDataRow(sheet, 1) + 1);
+
+    sheet.getRange(newRow, 1, 1, 4).setValues([[
+      salaryDate,
+      amount,
+      data.source || '',
+      data.notes || ''
+    ]]);
+
+    return jsonResponse({
+      success: true,
+      message: 'Salary entry added',
+      row: newRow
+    });
+  } catch (err) {
+    return jsonResponse({
+      success: false,
+      error: err.toString()
+    });
+  }
+}
+
+function getSalary() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.SALARY);
+    if (!sheet) throw new Error('Salary sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, entries: [] });
+    const startRow = Math.max(2, lastRow - 199);
+    const data = sheet.getRange(startRow, 1, lastRow - startRow + 1, 4).getValues();
+    const entries = data.map((row, i) => ({
+      row: startRow + i, date: fmtDate(row[0]), rawDate: fmtRawDate(row[0]), amount: row[1], source: row[2], notes: row[3]
+    })).filter(x => x.date);
+    return jsonResponse({ success: true, entries: entries });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// LOANS + AUTO-GENERATED SCHEDULE
+// ============================================================
+function addLoan(data) {
+  try {
+    const loanSheet = ss.getSheetByName(SHEET_NAMES.LOANS);
+    const schedSheet = ss.getSheetByName(SHEET_NAMES.LOAN_SCHEDULE);
+    if (!loanSheet) throw new Error('Loans sheet not found.');
+    if (!schedSheet) throw new Error('LoanSchedule sheet not found.');
+
+    const loanName = data.loanName || '';
+    const totalAmount = parseFloat(data.totalAmount) || 0;
+    const emiAmount = parseFloat(data.emiAmount) || 0;
+    const startMonth = new Date(data.startMonth);
+    const tenureMonths = parseInt(data.tenureMonths, 10) || 1;
+
+    const newRow = Math.max(2, getLastDataRow(loanSheet, 1) + 1);
+    loanSheet.getRange(newRow, 1, 1, 7).setValues([[loanName, totalAmount, emiAmount, startMonth, tenureMonths, data.notes || '', 'Active']]);
+
+    const schedStart = Math.max(2, getLastDataRow(schedSheet, 1) + 1);
+    const schedRows = [];
+    for (let i = 0; i < tenureMonths; i++) {
+      const monthDate = addMonths(startMonth, i);
+      schedRows.push([loanName, monthLabel(monthDate), monthDate, emiAmount, 'Pending']);
+    }
+    schedSheet.getRange(schedStart, 1, schedRows.length, 5).setValues(schedRows);
+
+    return jsonResponse({ success: true, message: 'Loan added with ' + tenureMonths + '-month schedule' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function updateLoanScheduleStatus(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.LOAN_SCHEDULE);
+    if (!sheet) throw new Error('LoanSchedule sheet not found.');
+    const row = parseInt(data.row, 10);
+    if (!row || row < 2) throw new Error('Invalid row number.');
+    sheet.getRange(row, 5).setValue(data.status || 'Pending');
+    return jsonResponse({ success: true, message: 'Status updated' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getLoans() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.LOANS);
+    if (!sheet) throw new Error('Loans sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, loans: [] });
+    const data = sheet.getRange(2, 1, lastRow - 1, 7).getValues();
+    const loans = data.map((row, i) => ({
+      row: i + 2, loanName: row[0], totalAmount: row[1], emiAmount: row[2],
+      startMonth: fmtDate(row[3]), tenureMonths: row[4], notes: row[5], status: row[6]
+    })).filter(l => l.loanName);
+    return jsonResponse({ success: true, loans: loans });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getLoanSchedule() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.LOAN_SCHEDULE);
+    if (!sheet) throw new Error('LoanSchedule sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, schedule: [] });
+    const data = sheet.getRange(2, 1, lastRow - 1, 5).getValues();
+    const schedule = data.map((row, i) => ({
+      row: i + 2, loanName: row[0], monthLabel: row[1], monthDate: fmtRawDate(row[2]), amount: row[3], status: row[4]
+    })).filter(s => s.loanName);
+    return jsonResponse({ success: true, schedule: schedule });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// RECEIVABLES
+// ============================================================
+function addReceivable(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.RECEIVABLES);
+    if (!sheet) throw new Error('Receivables sheet not found.');
+    const newRow = Math.max(2, getLastDataRow(sheet, 1) + 1);
+    sheet.getRange(newRow, 1, 1, 8).setValues([[
+      data.name || '', data.reason || '', parseFloat(data.amount) || 0, new Date(data.dateGiven),
+      data.countsTowardBalance || 'No', 'Pending', '', data.notes || ''
+    ]]);
+    return jsonResponse({ success: true, message: 'Receivable added', row: newRow });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function updateReceivable(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.RECEIVABLES);
+    if (!sheet) throw new Error('Receivables sheet not found.');
+    const row = parseInt(data.row, 10);
+    if (!row || row < 2) throw new Error('Invalid row number.');
+    if (data.status !== undefined) {
+      sheet.getRange(row, 6).setValue(data.status);
+      if (data.status === 'Received') sheet.getRange(row, 7).setValue(new Date());
+    }
+    if (data.countsTowardBalance !== undefined) sheet.getRange(row, 5).setValue(data.countsTowardBalance);
+    return jsonResponse({ success: true, message: 'Receivable updated' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getReceivables() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.RECEIVABLES);
+    if (!sheet) throw new Error('Receivables sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, receivables: [] });
+    const data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
+    const receivables = data.map((row, i) => ({
+      row: i + 2, name: row[0], reason: row[1], amount: row[2],
+      dateGiven: fmtDate(row[3]), rawDateGiven: fmtRawDate(row[3]),
+      countsTowardBalance: row[4], status: row[5], dateReceived: fmtDate(row[6]), notes: row[7]
+    })).filter(r => r.name);
+    return jsonResponse({ success: true, receivables: receivables });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// UPCOMING EXPENSES — the single place spending gets logged.
+// Marking an item Paid immediately writes it into ExpenseHistory (so Balance
+// drops right away). Reset only archives whatever is still Unpaid, since
+// Paid items were already logged the moment they were marked.
+// ============================================================
+function addUpcomingExpense(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.UPCOMING);
+    if (!sheet) throw new Error('UpcomingExpenses sheet not found. Run setupClaritySheets() once.');
+    const newRow = Math.max(2, getLastDataRow(sheet, 1) + 1);
+    sheet.getRange(newRow, 1, 1, 9).setValues([[
+      data.description || '', data.category || '', parseFloat(data.amount) || 0,
+      data.dueDate ? new Date(data.dueDate) : '', data.type || 'Purchase', 'Unpaid',
+      data.notes || '', data.paymentMethod || '', ''
+    ]]);
+    return jsonResponse({ success: true, message: 'Added', row: newRow });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getUpcomingExpenses() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.UPCOMING);
+    if (!sheet) throw new Error('UpcomingExpenses sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, items: [] });
+    const data = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
+    const items = data.map((row, i) => ({
+      row: i + 2, description: row[0], category: row[1], amount: row[2],
+      dueDate: fmtDate(row[3]), rawDueDate: fmtRawDate(row[3]),
+      type: row[4], status: row[5], notes: row[6], paymentMethod: row[7], historyRow: row[8]
+    })).filter(x => x.description);
+    return jsonResponse({ success: true, items: items });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// Toggling to Paid writes a row into ExpenseHistory right away and remembers
+// which history row it was (column I) so an "undo" can cleanly blank it out
+// again without shifting/breaking any other item's reference.
+function updateUpcomingExpenseStatus(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.UPCOMING);
+    const histSheet = ss.getSheetByName(SHEET_NAMES.HISTORY);
+    if (!sheet) throw new Error('UpcomingExpenses sheet not found.');
+    if (!histSheet) throw new Error('ExpenseHistory sheet not found.');
+    const row = parseInt(data.row, 10);
+    if (!row || row < 2) throw new Error('Invalid row number.');
+    const newStatus = data.status === 'Paid' ? 'Paid' : 'Unpaid';
+
+    const existing = sheet.getRange(row, 1, 1, 9).getValues()[0];
+    const description = existing[0], category = existing[1], amount = parseFloat(existing[2]) || 0,
+          dueDate = existing[3], type = existing[4], notes = existing[6], paymentMethod = existing[7];
+    let historyRow = existing[8];
+
+    if (newStatus === 'Paid') {
+      const newHistRow = Math.max(2, getLastDataRow(histSheet, 1) + 1);
+      histSheet.getRange(newHistRow, 1, 1, 9).setValues([[new Date(), description, category, amount, dueDate, type, 'Paid', notes, paymentMethod]]);
+      historyRow = newHistRow;
+    } else if (historyRow) {
+      histSheet.getRange(parseInt(historyRow, 10), 1, 1, 9).clearContent();
+      historyRow = '';
+    }
+
+    sheet.getRange(row, 6, 1, 1).setValue(newStatus);
+    sheet.getRange(row, 9, 1, 1).setValue(historyRow);
+    return jsonResponse({ success: true, message: 'Status updated' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function deleteUpcomingExpense(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.UPCOMING);
+    const histSheet = ss.getSheetByName(SHEET_NAMES.HISTORY);
+    if (!sheet) throw new Error('UpcomingExpenses sheet not found.');
+    const row = parseInt(data.row, 10);
+    if (!row || row < 2) throw new Error('Invalid row number.');
+    const existing = sheet.getRange(row, 1, 1, 9).getValues()[0];
+    const historyRow = existing[8];
+    if (historyRow && histSheet) histSheet.getRange(parseInt(historyRow, 10), 1, 1, 9).clearContent();
+    sheet.deleteRow(row);
+    return jsonResponse({ success: true, message: 'Removed' });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// Archives whatever is still Unpaid into ExpenseHistory (stamped with today's
+// date), then clears the whole working list. Paid items need no action here —
+// they were already written to history the moment they were marked Paid.
+function resetUpcomingExpenses(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.UPCOMING);
+    const histSheet = ss.getSheetByName(SHEET_NAMES.HISTORY);
+    if (!sheet) throw new Error('UpcomingExpenses sheet not found.');
+    if (!histSheet) throw new Error('ExpenseHistory sheet not found.');
+
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: false, error: 'The list is already empty — nothing to reset.' });
+
+    const values = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
+    const archivedOn = new Date();
+    const unpaidRows = [];
+    let paidCount = 0;
+
+    values.forEach(row => {
+      if (!row[0]) return;
+      if (row[5] === 'Paid') {
+        paidCount++;
+      } else {
+        unpaidRows.push([archivedOn, row[0], row[1], parseFloat(row[2]) || 0, row[3], row[4], 'Unpaid', row[6], row[7]]);
+      }
+    });
+
+    if (unpaidRows.length > 0) {
+      const histStart = Math.max(2, getLastDataRow(histSheet, 1) + 1);
+      histSheet.getRange(histStart, 1, unpaidRows.length, 9).setValues(unpaidRows);
+    }
+
+    sheet.getRange(2, 1, lastRow - 1, 9).clearContent();
+    return jsonResponse({
+      success: true,
+      message: unpaidRows.length + ' unpaid item(s) archived, ' + paidCount + ' already-paid item(s) cleared. Ready for the new month.',
+      archivedUnpaid: unpaidRows.length, alreadyPaid: paidCount
+    });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getUpcomingHistory() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.HISTORY);
+    if (!sheet) throw new Error('ExpenseHistory sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, items: [] });
+    const startRow = Math.max(2, lastRow - 299);
+    const data = sheet.getRange(startRow, 1, lastRow - startRow + 1, 9).getValues();
+    const items = data.map((row, i) => ({
+      row: startRow + i, cycleDate: fmtDate(row[0]), rawCycleDate: fmtRawDate(row[0]),
+      description: row[1], category: row[2], amount: row[3],
+      dueDate: fmtDate(row[4]), type: row[5], status: row[6], notes: row[7], paymentMethod: row[8]
+    })).filter(x => x.description);
+    return jsonResponse({ success: true, items: items });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// STATEMENT TRANSACTIONS (AI-assisted parsing + auto category growth)
+// ============================================================
+function parseStatementText(data) {
+  try {
+    const apiKey = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
+    if (!apiKey) throw new Error('GEMINI_API_KEY is not set in Script Properties. Add it under Project Settings.');
+
+    let text = (data.text || '').toString();
+    if (text.length > 18000) text = text.substring(0, 18000);
+
+    const lists = getCategoryLists();
+    const categoryHint = lists.expenseCategories.join(', ');
+
+    const prompt = 'You are extracting transactions from a bank/credit card statement.\n' +
+      'Given the raw text below, return ONLY a JSON array (no markdown, no explanation) of objects with fields: ' +
+      'date (YYYY-MM-DD), description (string), amount (positive number), type ("Debit" or "Credit"), category (string).\n' +
+      'Prefer reusing one of these existing categories when it fits: ' + categoryHint + '. ' +
+      'Only invent a new, short category name if none of those genuinely fit.\n' +
+      'Skip headers, balances, and summary lines - only actual transaction rows.\n' +
+      'If a date has no year, infer the most likely year from context.\n' +
+      'STATEMENT TEXT:\n' + text;
+
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + apiKey;
+    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+    const response = UrlFetchApp.fetch(url, {
+      method: 'post', contentType: 'application/json', payload: JSON.stringify(payload), muteHttpExceptions: true
+    });
+    const result = JSON.parse(response.getContentText());
+    if (result.error) throw new Error(result.error.message || 'Gemini API error');
+
+    let raw = result.candidates && result.candidates[0] && result.candidates[0].content &&
+      result.candidates[0].content.parts && result.candidates[0].content.parts[0].text;
+    if (!raw) throw new Error('No response from Gemini.');
+    raw = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+    const transactions = JSON.parse(raw);
+
+    const seen = {};
+    transactions.forEach(tx => { if (tx.category && !seen[tx.category]) { addCategoryIfNew(tx.category); seen[tx.category] = true; } });
+    const updatedLists = getCategoryLists();
+
+    return jsonResponse({ success: true, transactions: transactions, expenseCategories: updatedLists.expenseCategories });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function saveStatementTransactions(data) {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.STATEMENT_TX);
+    if (!sheet) throw new Error('StatementTransactions sheet not found.');
+    const transactions = data.transactions || [];
+    const source = data.source || '';
+    const batchId = new Date().getTime().toString();
+
+    const seenCats = {};
+    const rows = transactions.map(tx => {
+      const category = tx.category || 'Uncategorized';
+      if (!seenCats[category]) { addCategoryIfNew(category); seenCats[category] = true; }
+      return [tx.date ? new Date(tx.date) : '', tx.description || '', parseFloat(tx.amount) || 0, tx.type || '', source, category, batchId, tx.notes || ''];
+    });
+    if (rows.length > 0) {
+      const startRow = Math.max(2, getLastDataRow(sheet, 1) + 1);
+      sheet.getRange(startRow, 1, rows.length, 8).setValues(rows);
+    }
+    return jsonResponse({ success: true, message: transactions.length + ' transactions saved', batchId: batchId });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+function getStatementTransactions() {
+  try {
+    const sheet = ss.getSheetByName(SHEET_NAMES.STATEMENT_TX);
+    if (!sheet) throw new Error('StatementTransactions sheet not found.');
+    const lastRow = getLastDataRow(sheet, 1);
+    if (lastRow < 2) return jsonResponse({ success: true, transactions: [] });
+    const startRow = Math.max(2, lastRow - 299);
+    const data = sheet.getRange(startRow, 1, lastRow - startRow + 1, 8).getValues();
+    const transactions = data.map((row, i) => ({
+      row: startRow + i, date: fmtDate(row[0]), rawDate: fmtRawDate(row[0]),
+      description: row[1], amount: row[2], type: row[3], source: row[4], category: row[5], importBatch: row[6], notes: row[7]
+    })).filter(x => x.date);
+    return jsonResponse({ success: true, transactions: transactions });
+  } catch (err) {
+    return jsonResponse({ success: false, error: err.toString() });
+  }
+}
+
+// ============================================================
+// DASHBOARD — one call returns everything the Dashboard view needs,
+// including the category breakdown and 6-month trend (no extra round-trips).
+// ============================================================
+function getDashboard() {
+  try {
+    const config = readConfig();
+    const openingBalance = parseFloat(config.OPENING_BALANCE) || 0;
+    const includeSalaryInBalance = config.INCLUDE_SALARY_IN_BALANCE !== 'No';
+    const now = new Date();
+
+    // ============================================================
+    // SALARY
+    // All salary received on or before today contributes to the
+    // actual balance. Current-month salary is also returned
+    // separately for dashboard display.
+    // ============================================================
+    let salaryThisMonth = 0;
+    let totalSalaryReceived = 0;
+
+    const salSheet = ss.getSheetByName(SHEET_NAMES.SALARY);
+
+    if (salSheet) {
+      const lastRow = getLastDataRow(salSheet, 1);
+
+      if (lastRow >= 2) {
+        const data = salSheet.getRange(2, 1, lastRow - 1, 2).getValues();
+
+        data.forEach(row => {
+          if (!row[0]) return;
+
+          const salaryDate = new Date(row[0]);
+          const amount = parseFloat(row[1]) || 0;
+
+          if (isNaN(salaryDate.getTime())) return;
+
+          if (salaryDate <= now) {
+            totalSalaryReceived += amount;
+          }
+
+          if (isSameMonth(salaryDate, now)) {
+            salaryThisMonth += amount;
+          }
+        });
+      }
+    }
+
+    // ============================================================
+    // 6-MONTH TREND
+    // ============================================================
+    const trendMonths = [];
+    const trendByKey = {};
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+      const m = {
+        key: d.getFullYear() + '-' + (d.getMonth() + 1),
+        label: Utilities.formatDate(
+          d,
+          Session.getScriptTimeZone(),
+          'MMM'
+        ),
+        expense: 0,
+        emi: 0
+      };
+
+      trendMonths.push(m);
+      trendByKey[m.key] = m;
+    }
+
+    // ============================================================
+    // EXPENSE HISTORY
+    // ============================================================
+    let thisMonthExpensesPaid = 0;
+    const categoryBreakdown = {};
+
+    const histSheet = ss.getSheetByName(SHEET_NAMES.HISTORY);
+
+    if (histSheet) {
+      const lastRow = getLastDataRow(histSheet, 1);
+
+      if (lastRow >= 2) {
+        const data = histSheet.getRange(2, 1, lastRow - 1, 9).getValues();
+
+        data.forEach(row => {
+          const loggedDate = row[0];
+          const description = row[1];
+          const category = row[2] || 'Other';
+          const amount = parseFloat(row[3]) || 0;
+          const status = row[6];
+
+          if (!description || status !== 'Paid' || !loggedDate) return;
+
+          const d = new Date(loggedDate);
+
+          if (isNaN(d.getTime())) return;
+
+          if (isSameMonth(d, now)) {
+            thisMonthExpensesPaid += amount;
+            categoryBreakdown[category] =
+              (categoryBreakdown[category] || 0) + amount;
+          }
+
+          const key = d.getFullYear() + '-' + (d.getMonth() + 1);
+
+          if (trendByKey[key]) {
+            trendByKey[key].expense += amount;
+          }
+        });
+      }
+    }
+
+    // ============================================================
+    // EMI
+    // ============================================================
+    let thisMonthEMI = 0;
+    let thisMonthEMIPaid = 0;
+    let thisMonthEMIPending = 0;
+
+    const schedSheet = ss.getSheetByName(SHEET_NAMES.LOAN_SCHEDULE);
+
+    if (schedSheet) {
+      const lastRow = getLastDataRow(schedSheet, 1);
+
+      if (lastRow >= 2) {
+        const data = schedSheet.getRange(2, 1, lastRow - 1, 5).getValues();
+
+        data.forEach(row => {
+          if (!row[2]) return;
+
+          const amt = parseFloat(row[3]) || 0;
+
+          if (isSameMonth(row[2], now)) {
+            thisMonthEMI += amt;
+
+            if (row[4] === 'Paid') {
+              thisMonthEMIPaid += amt;
+            } else {
+              thisMonthEMIPending += amt;
+            }
+          }
+
+          if (row[4] === 'Paid') {
+            const d = new Date(row[2]);
+
+            if (isNaN(d.getTime())) return;
+
+            const key = d.getFullYear() + '-' + (d.getMonth() + 1);
+
+            if (trendByKey[key]) {
+              trendByKey[key].emi += amt;
+            }
+          }
+        });
+      }
+    }
+
+    // ============================================================
+    // UPCOMING EXPENSES
+    // ============================================================
+    let upcomingUnpaid = 0;
+    let upcomingPaid = 0;
+    const upcomingList = [];
+
+    const upSheet = ss.getSheetByName(SHEET_NAMES.UPCOMING);
+
+    if (upSheet) {
+      const lastRow = getLastDataRow(upSheet, 1);
+
+      if (lastRow >= 2) {
+        const data = upSheet.getRange(2, 1, lastRow - 1, 9).getValues();
+
+        data.forEach((row, i) => {
+          if (!row[0]) return;
+
+          const amt = parseFloat(row[2]) || 0;
+
+          if (row[5] === 'Paid') {
+            upcomingPaid += amt;
+          } else {
+            upcomingUnpaid += amt;
+          }
+
+          upcomingList.push({
+            row: i + 2,
+            description: row[0],
+            category: row[1],
+            amount: amt,
+            dueDate: fmtDate(row[3]),
+            rawDueDate: fmtRawDate(row[3]),
+            type: row[4],
+            status: row[5],
+            notes: row[6],
+            paymentMethod: row[7]
+          });
+        });
+      }
+    }
+
+    upcomingList.sort((a, b) =>
+      new Date(a.rawDueDate || '2999-01-01') -
+      new Date(b.rawDueDate || '2999-01-01')
+    );
+
+    // ============================================================
+    // RECEIVABLES
+    //
+    // Received + Counts Toward Balance = YES
+    //     -> adds to ACTUAL BALANCE
+    //
+    // Pending + Counts Toward Balance = YES
+    //     -> adds only to PROJECTED BALANCE
+    //
+    // Counts Toward Balance = NO
+    //     -> excluded from both
+    // ============================================================
+    let receivablesReceived = 0;
+    let receivablesPending = 0;
+    let receivablesExcluded = 0;
+    let receivablesPendingCount = 0;
+    let receivablesReceivedCount = 0;
+
+    const recvSheet = ss.getSheetByName(SHEET_NAMES.RECEIVABLES);
+
+    if (recvSheet) {
+      const lastRow = getLastDataRow(recvSheet, 1);
+
+      if (lastRow >= 2) {
+        const data = recvSheet.getRange(2, 1, lastRow - 1, 6).getValues();
+
+        data.forEach(row => {
+          if (!row[0]) return;
+
+          const amount = parseFloat(row[2]) || 0;
+          const countsTowardBalance =
+            (row[4] || '').toString().trim() === 'Yes';
+
+          const status =
+            (row[5] || '').toString().trim();
+
+          if (!countsTowardBalance) {
+            receivablesExcluded += amount;
+            return;
+          }
+
+          if (status === 'Received') {
+            receivablesReceived += amount;
+            receivablesReceivedCount++;
+          } else if (status === 'Pending') {
+            receivablesPending += amount;
+            receivablesPendingCount++;
+          }
+        });
+      }
+    }
+
+    // Keep the old field for frontend compatibility.
+    // It now represents all counted receivables, regardless of status.
+    const receivablesCounted =
+      receivablesReceived + receivablesPending;
+
+    // ============================================================
+    // BALANCE
+    // ============================================================
+    const salaryForBalance =
+      includeSalaryInBalance
+        ? totalSalaryReceived
+        : 0;
+
+    const spent =
+      thisMonthExpensesPaid +
+      thisMonthEMIPaid;
+
+    // RECEIVED receivables are actual money and therefore increase
+    // the actual balance.
+    const balance =
+      openingBalance +
+      salaryForBalance +
+      receivablesReceived -
+      spent;
+
+    // Pending receivables are future money, so they only affect
+    // projected balance.
+    const projectedBalance =
+      balance -
+      thisMonthEMIPending -
+      upcomingUnpaid +
+      receivablesPending;
+
+    return jsonResponse({
+      success: true,
+
+      openingBalance: openingBalance,
+
+      includeSalaryInBalance:
+        includeSalaryInBalance,
+
+      salaryThisMonth:
+        salaryThisMonth,
+
+      totalSalaryReceived:
+        totalSalaryReceived,
+
+      salaryForBalance:
+        salaryForBalance,
+
+      // Income aliases for dashboard/front-end compatibility.
+      // "income" is the total salary received up to today, while
+      // "incomeThisMonth" is salary received in the current month.
+      income:
+        totalSalaryReceived,
+
+      incomeThisMonth:
+        salaryThisMonth,
+
+      thisMonthExpenses:
+        thisMonthExpensesPaid,
+
+      thisMonthEMI:
+        thisMonthEMI,
+
+      thisMonthEMIPaid:
+        thisMonthEMIPaid,
+
+      thisMonthEMIPending:
+        thisMonthEMIPending,
+
+      upcomingUnpaid:
+        upcomingUnpaid,
+
+      upcomingPaid:
+        upcomingPaid,
+
+      upcomingList:
+        upcomingList,
+
+      spent:
+        spent,
+
+      balance:
+        balance,
+
+      projectedBalance:
+        projectedBalance,
+
+      // Receivables
+      receivablesCounted:
+        receivablesCounted,
+
+      receivablesReceived:
+        receivablesReceived,
+
+      receivablesPending:
+        receivablesPending,
+
+      receivablesExcluded:
+        receivablesExcluded,
+
+      receivablesReceivedCount:
+        receivablesReceivedCount,
+
+      receivablesPendingCount:
+        receivablesPendingCount,
+
+      categoryBreakdown:
+        categoryBreakdown,
+
+      trend:
+        trendMonths.map(m => ({
+          label: m.label,
+          expense: m.expense,
+          emi: m.emi
+        }))
+    });
+
+  } catch (err) {
+    return jsonResponse({
+      success: false,
+      error: err.toString()
+    });
+  }
+}
+
+// ============================================================
+// STATS — a single call for the Stats view (income vs expense, by period).
+// ============================================================
+function getStats(period) {
+  try {
+    period = period || 'this';
+    const now = new Date();
+
+    function withinPeriod(dateVal) {
+      if (!dateVal) return false;
+
+      const d = new Date(dateVal);
+      if (isNaN(d.getTime())) return false;
+
+      if (period === 'all') return true;
+
+      if (period === 'this') {
+        return (
+          d.getFullYear() === now.getFullYear() &&
+          d.getMonth() === now.getMonth()
+        );
+      }
+
+      const monthsBack = parseInt(period, 10);
+
+      if (isNaN(monthsBack)) return false;
+
+      const cutoff =
+        new Date(
+          now.getFullYear(),
+          now.getMonth() - monthsBack + 1,
+          1
+        );
+
+      return d >= cutoff;
+    }
+
+    // ============================================================
+    // SALARY / INCOME
+    // ============================================================
+    let income = 0;
+    let incomeEntries = 0;
+
+    const salSheet = ss.getSheetByName(SHEET_NAMES.SALARY);
+
+    if (salSheet) {
+      const lastRow = getLastDataRow(salSheet, 1);
+
+      if (lastRow >= 2) {
+        const data = salSheet.getRange(2, 1, lastRow - 1, 2).getValues();
+
+        data.forEach(row => {
+          if (!row[0]) return;
+
+          const salaryDate = new Date(row[0]);
+
+          if (isNaN(salaryDate.getTime())) return;
+
+          if (withinPeriod(salaryDate)) {
+            income += parseFloat(row[1]) || 0;
+            incomeEntries++;
+          }
+        });
+      }
+    }
+
+    // =====================================
+
+// ============================================================
+// EXPENSES — StatementTransactions where Type is Debit
+// ============================================================
+let expense = 0;
+let expenseEntries = 0;
+const categoryBreakdown = {};
+
+const statementSheet = ss.getSheetByName(SHEET_NAMES.STATEMENT_TX);
+
+if (statementSheet) {
+  const lastRow = getLastDataRow(statementSheet, 1);
+
+  if (lastRow >= 2) {
+    // Date, Description, Amount, Type, Source, Category, Import Batch, Notes
+    const data = statementSheet
+      .getRange(2, 1, lastRow - 1, 8)
+      .getValues();
+
+    data.forEach(row => {
+      const transactionDate = row[0];
+      const description = row[1];
+      const amount = parseFloat(row[2]) || 0;
+      const type = String(row[3] || '').trim().toLowerCase();
+      const category = row[5] || 'Other';
+
+      // Only Debit transactions are treated as expenses
+      if (!description || type !== 'debit') return;
+
+      if (withinPeriod(transactionDate)) {
+        expense += Math.abs(amount);
+        expenseEntries++;
+
+        categoryBreakdown[category] =
+          (categoryBreakdown[category] || 0) + Math.abs(amount);
+      }
+    });
+  }
+}
+    // ============================================================
+    // EMI
+    // ============================================================
+    let emiPaid = 0;
+
+    const schedSheet =
+      ss.getSheetByName(SHEET_NAMES.LOAN_SCHEDULE);
+
+    if (schedSheet) {
+      const lastRow = getLastDataRow(schedSheet, 1);
+
+      if (lastRow >= 2) {
+        const data =
+          schedSheet.getRange(2, 1, lastRow - 1, 5).getValues();
+
+        data.forEach(row => {
+          if (
+            row[4] === 'Paid' &&
+            row[2] &&
+            withinPeriod(row[2])
+          ) {
+            const amt = parseFloat(row[3]) || 0;
+
+            emiPaid += amt;
+
+            categoryBreakdown['Loan / EMI'] =
+              (categoryBreakdown['Loan / EMI'] || 0) +
+              amt;
+          }
+        });
+      }
+    }
+
+    const totalExpense = expense + emiPaid;
+
+    return jsonResponse({
+      success: true,
+      income: income,
+      salary: income,
+      expense: totalExpense,
+      net: income - totalExpense,
+      entries: incomeEntries + expenseEntries,
+      incomeEntries: incomeEntries,
+      salaryEntries: incomeEntries,
+      expenseEntries: expenseEntries,
+      categoryBreakdown: categoryBreakdown
+    });
+
+  } catch (err) {
+    return jsonResponse({
+      success: false,
+      error: err.toString()
+    });
+  }
+}
+
